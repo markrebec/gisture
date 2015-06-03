@@ -142,6 +142,13 @@ rake gisture:run[abc123,eval,my_file.rb]
 rake gisture:run[abc123,load,my_method.rb,'my_method(whatever)']
 ```
 
+## TODO
+
+* Specs
+* Support for specifying a version of a gist
+* Better support for gists with multiple files
+* Allow sources other than gists, like repos containing one-off scripts, generic github blobs, local files, etc.
+
 ## Contributing
 1. Fork it
 2. Create your feature branch (`git checkout -b my-new-feature`)
