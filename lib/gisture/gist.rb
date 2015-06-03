@@ -6,8 +6,8 @@ module Gisture
 
     STRATEGIES = [:eval, :load, :require]
 
-    def self.run!(gist_id: gist_id, strategy: :load, &block)
-      new(gist_id: gist_id, strategy: strategy).run!(&block)
+    def self.run!(gist_id: nil, strategy: :load, filename: nil, &block)
+      new(gist_id: gist_id, strategy: strategy, filename: filename).run!(&block)
     end
 
     def run!(&block)
