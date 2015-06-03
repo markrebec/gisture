@@ -1,5 +1,6 @@
 require 'canfig'
 require 'gisture/version'
+require 'gisture/evaluator'
 require 'gisture/gist'
 
 module Gisture
