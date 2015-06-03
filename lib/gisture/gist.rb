@@ -6,7 +6,7 @@ module Gisture
 
     STRATEGIES = [:eval, :load, :require]
 
-    def self.run!(gist_id: nil, strategy: :load, filename: nil, &block)
+    def self.run!(gist_id: nil, strategy: nil, filename: nil, &block)
       new(gist_id: gist_id, strategy: strategy, filename: filename).run!(&block)
     end
 
@@ -85,11 +85,11 @@ module Gisture
 
     protected
 
-    def initialize(gist_id: nil, strategy: :load, filename: nil)
+    def initialize(gist_id: nil, strategy: nil, filename: nil)
       raise ArgumentError, "Invalid gist_id" if gist_id.nil?
       @gist_id = gist_id
       @filename = filename
-      self.strategy = strategy
+      self.strategy = strategy || :eval
     end
 
     def unlink_tempfile

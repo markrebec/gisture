@@ -22,11 +22,11 @@ module Gisture
     config.tmpdir         = Dir.tmpdir  # location to store gist tempfiles
   end
 
-  def self.new(gist_id, strategy=:load, filename=nil)
+  def self.new(gist_id, strategy=nil, filename=nil)
     Gisture::Gist.new(gist_id: gist_id, strategy: strategy, filename: filename)
   end
 
-  def self.run(gist_id, strategy=:load, filename=nil, &block)
+  def self.run(gist_id, strategy=nil, filename=nil, &block)
     new(gist_id, strategy, filename).run!(&block)
   end
 end
