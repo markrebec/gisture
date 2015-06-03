@@ -3,6 +3,7 @@ require 'github_api'
 require 'gisture/version'
 require 'gisture/evaluator'
 require 'gisture/gist'
+require 'gisture/railtie' if defined?(Rails)
 
 module Gisture
   include Canfig::Module
