@@ -7,6 +7,8 @@ require 'gisture/gist'
 module Gisture
   include Canfig::Module
 
+  GITHUB_CONFIG_OPTS = [:basic_auth, :oauth_token, :client_id, :client_secret, :user, :org]
+
   configure do |config|
     # config options for the github_api gem
     config.basic_auth     = nil # user:password string

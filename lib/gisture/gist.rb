@@ -52,7 +52,7 @@ module Gisture
       @id = gist_id
       self.strategy = strategy
 
-      github_config = [:basic_auth, :oauth_token, :client_id, :client_secret, :user, :org].map { |key| [key, Gisture.configuration.send(key)] }.to_h
+      github_config = Gisture::GITHUB_CONFIG_OPTS.map { |key| [key, Gisture.configuration.send(key)] }.to_h
       @github = Github.new(github_config)
 
       @gist = @github.gists.get(id)
