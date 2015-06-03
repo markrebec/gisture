@@ -52,8 +52,8 @@ module Gisture
       @id = gist_id
       self.strategy = strategy
 
-      # TODO pass through all configuration options
-      @github = Github.new oauth_token: Gisture.configuration.oauth_token
+      github_config = [:basic_auth, :oauth_token, :client_id, :client_secret, :user, :org].map { |key| [key, Gisture.configuration.send(key)] }.to_h
+      @github = Github.new(github_config)
 
       @gist = @github.gists.get(id)
       raise ArgumentError, "Gisture does not currently support gists with more than one file" if gist.files.count > 1
