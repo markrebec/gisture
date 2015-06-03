@@ -6,11 +6,15 @@ module Gisture
 
     STRATEGIES = [:eval, :load, :require]
 
+    def self.run!(gist_id, strategy: :load, &block)
+      new(gist_id, strategy: strategy).run!(&block)
+    end
+
     def raw
       gist.files.first[1].content
     end
 
-    def call!(&block)
+    def run!(&block)
       send "#{strategy}!".to_sym, &block
     end
 
