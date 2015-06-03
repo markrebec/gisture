@@ -39,7 +39,7 @@ module Gisture
 
     def tempfile
       @tempfile ||= begin
-        file = Tempfile.new([id, '.rb'])
+        file = Tempfile.new([id, '.rb'], Gisture.configuration.tmpdir)
         file.write(raw)
         file.close
         file

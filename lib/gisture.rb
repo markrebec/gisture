@@ -15,5 +15,7 @@ module Gisture
     config.client_secret  = nil # oauth client secret
     config.user           = nil # global user used in requets if none provided
     config.org            = nil # global organization used in request if none provided
+
+    config.tmpdir         = Dir.tmpdir  # location to store gist tempfiles
   end
 end
