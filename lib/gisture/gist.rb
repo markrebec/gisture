@@ -1,7 +1,8 @@
 module Gisture
   class Gist
-    # TODO model a gist (the github gist ID, local tempfile, raw data, etc.)
     attr_reader :filepath, :strategy
+
+    STRATEGIES = [:eval, :load, :require]
 
     def raw
       File.read(filepath)
@@ -27,11 +28,16 @@ module Gisture
       clean_room
     end
 
+    def strategy=(strat)
+      raise ArgumentError, "Invalid strategy '#{strat}'. Must be one of #{STRATEGIES.join(', ')}" unless STRATEGIES.include?(strat.to_sym)
+      @strategy = strat.to_sym
+    end
+
     protected
 
     def initialize(filepath: nil, strategy: :load)
       @filepath = filepath
-      @strategy = strategy
+      self.strategy = strategy
     end
   end
 end
