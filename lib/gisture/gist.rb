@@ -41,6 +41,7 @@ module Gisture
       @tempfile ||= begin
         file = Tempfile.new(id)
         file.write(raw)
+        file.close
         file
       end
     end
