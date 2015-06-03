@@ -1,0 +1,5 @@
+.bundle
+Gemfile.lock
+*.swp
+.rspec
+coverage
