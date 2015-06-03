@@ -1,11 +1,13 @@
+require 'tempfile'
+
 module Gisture
   class Gist
-    attr_reader :filepath, :strategy
+    attr_reader :id, :gist, :github, :strategy
 
     STRATEGIES = [:eval, :load, :require]
 
     def raw
-      File.read(filepath)
+      gist.files.first[1].content
     end
 
     def call!(&block)
@@ -13,12 +15,14 @@ module Gisture
     end
 
     def require!(&block)
-      require filepath
+      require tempfile.path
+      tempfile.unlink
       block.call TOPLEVEL_BINDING if block_given?
     end
 
     def load!(&block)
-      load filepath
+      load tempfile.path
+      tempfile.unlink
       block.call TOPLEVEL_BINDING if block_given?
     end
 
@@ -33,11 +37,25 @@ module Gisture
       @strategy = strat.to_sym
     end
 
+    def tempfile
+      @tempfile ||= begin
+        file = Tempfile.new(id)
+        file.write(raw)
+        file
+      end
+    end
+
     protected
 
-    def initialize(filepath: nil, strategy: :load)
-      @filepath = filepath
+    def initialize(gist_id, strategy: :load)
+      @id = gist_id
       self.strategy = strategy
+
+      # TODO pass through all configuration options
+      @github = Github.new oauth_token: Gisture.configuration.oauth_token
+
+      @gist = @github.gists.get(id)
+      raise ArgumentError, "Gisture does not currently support gists with more than one file" if gist.files.count > 1
     end
   end
 end

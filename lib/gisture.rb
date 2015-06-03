@@ -1,4 +1,5 @@
 require 'canfig'
+require 'github_api'
 require 'gisture/version'
 require 'gisture/evaluator'
 require 'gisture/gist'
