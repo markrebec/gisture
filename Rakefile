@@ -1,4 +1,9 @@
 require 'rspec/core/rake_task'
+load 'tasks/gisture.rake'
+
+task :environment do
+  # noop
+end
 
 desc 'Run the specs'
 RSpec::Core::RakeTask.new do |r|
