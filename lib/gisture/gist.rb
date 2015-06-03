@@ -16,13 +16,13 @@ module Gisture
 
     def require!(&block)
       require tempfile.path
-      tempfile.unlink
+      unlink_tempfile
       block.call TOPLEVEL_BINDING if block_given?
     end
 
     def load!(&block)
       load tempfile.path
-      tempfile.unlink
+      unlink_tempfile
       block.call TOPLEVEL_BINDING if block_given?
     end
 
@@ -39,7 +39,7 @@ module Gisture
 
     def tempfile
       @tempfile ||= begin
-        file = Tempfile.new(id)
+        file = Tempfile.new([id, '.rb'])
         file.write(raw)
         file.close
         file
@@ -57,6 +57,11 @@ module Gisture
 
       @gist = @github.gists.get(id)
       raise ArgumentError, "Gisture does not currently support gists with more than one file" if gist.files.count > 1
+    end
+
+    def unlink_tempfile
+      tempfile.unlink
+      @tempfile = nil
     end
   end
 end
