@@ -22,6 +22,24 @@ Add the gem to your project's Gemfile:
 
 Then run `bundle install`. Or install gisture system wide with `gem install gisture`.
 
+### Configuration
+
+Gisture uses the [github_api](http://peter-murach.github.io/github/) gem to load gists, and passes through a couple configuration options (mostly around authentication). You can configure these options and any other gisture options using `Gisture.configure` with a block wherever appropriate for your project (for example in a rails config initializer). Below is an example along with list of all gisture config options and their defaults.
+
+```ruby
+Gisture.configure do |config|
+  # config options for the github_api gem
+  config.basic_auth     = nil # user:password string
+  config.oauth_token    = nil # oauth authorization token
+  config.client_id      = nil # oauth client id
+  config.client_secret  = nil # oauth client secret
+  config.user           = nil # global user used in requets if none provided
+  config.org            = nil # global organization used in request if none provided
+
+  config.tmpdir         = Dir.tmpdir  # location to store gist tempfiles when using the require or load strategies
+end
+```
+
 ## Usage
 
 There are a couple ways to load and run a gist. You can use the `Gisture::Gist` class directly, or use shortcut methods directly on the `Gisture` module. The only required argument is the ID of the gist with which you'd like to work.
@@ -62,7 +80,7 @@ Without the provided block, all that would happen is your method would be define
 
 ### Execution Strategies
 
-There are three execution strategies available for running your gists. These are `:eval`, `:load` and `:require`. The strategy you use will depend heavily on what exactly you're trying to do and how the code in your gist is structured. For example, if you're defining modules/classes then you probably want to `load` or `require` the gist file then utilize those classes. If you are performing a lot of inline functional operations that you want to be executed you'd probably lean towards `eval` or `load`.
+There are three execution strategies available for running your gists. These are `:eval`, `:load` and `:require`. The strategy you use will depend heavily on what exactly you're trying to do and how the code in your gist is structured. For example, if you're defining modules/classes for use elsewhere in your project, then you probably want to `load` or `require` the gist file, then utilize those classes. If you are performing a lot of inline functional operations that you want to be executed inline or in a background task you'd probably lean towards `eval` or `load`.
 
 **:eval**
 
