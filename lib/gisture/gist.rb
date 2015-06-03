@@ -2,16 +2,12 @@ require 'tempfile'
 
 module Gisture
   class Gist
-    attr_reader :id, :gist, :github, :strategy
+    attr_reader :filename, :gist_id, :strategy
 
     STRATEGIES = [:eval, :load, :require]
 
-    def self.run!(gist_id, strategy: :load, &block)
-      new(gist_id, strategy: strategy).run!(&block)
-    end
-
-    def raw
-      gist.files.first[1].content
+    def self.run!(gist_id: gist_id, strategy: :load, &block)
+      new(gist_id: gist_id, strategy: strategy).run!(&block)
     end
 
     def run!(&block)
@@ -36,6 +32,37 @@ module Gisture
       clean_room
     end
 
+    def github
+      @github ||= begin
+        github_config = Gisture::GITHUB_CONFIG_OPTS.map { |key| [key, Gisture.configuration.send(key)] }.to_h
+        Github.new(github_config)
+      end
+    end
+
+    def gist
+      @gist ||= github.gists.get(gist_id)
+    end
+
+    def gist_file
+      return @gist_file unless @gist_file.nil?
+
+      if gist.files.count > 1
+        raise ArgumentError, "You must specify a filename if your gist contains more than one file" if filename.nil?
+        gist.files.each do |file|
+          @gist_file = file if file[0] == filename
+        end
+        raise ArgumentError, "The filename '#{filename}' was not found in the list of files for the gist '#{gist_id}'" if @gist_file.nil?
+      else
+        @gist_file = gist.files.first
+      end
+
+      @gist_file
+    end
+
+    def raw
+      gist_file[1].content
+    end
+
     def strategy=(strat)
       raise ArgumentError, "Invalid strategy '#{strat}'. Must be one of #{STRATEGIES.join(', ')}" unless STRATEGIES.include?(strat.to_sym)
       @strategy = strat.to_sym
@@ -43,24 +70,26 @@ module Gisture
 
     def tempfile
       @tempfile ||= begin
-        file = Tempfile.new([id, '.rb'], Gisture.configuration.tmpdir)
+        file = Tempfile.new([gist_id, '.rb'], Gisture.configuration.tmpdir)
         file.write(raw)
         file.close
         file
       end
     end
 
+    def to_h
+      { gist_id: gist_id,
+        strategy: strategy,
+        filename: filename }
+    end
+
     protected
 
-    def initialize(gist_id, strategy: :load)
-      @id = gist_id
+    def initialize(gist_id: nil, strategy: :load, filename: nil)
+      raise ArgumentError, "Invalid gist_id" if gist_id.nil?
+      @gist_id = gist_id
+      @filename = filename
       self.strategy = strategy
-
-      github_config = Gisture::GITHUB_CONFIG_OPTS.map { |key| [key, Gisture.configuration.send(key)] }.to_h
-      @github = Github.new(github_config)
-
-      @gist = @github.gists.get(id)
-      raise ArgumentError, "Gisture does not currently support gists with more than one file" if gist.files.count > 1
     end
 
     def unlink_tempfile
