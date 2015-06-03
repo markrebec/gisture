@@ -1,4 +1,6 @@
+require 'canfig'
 require 'gisture/version'
+require 'gisture/gist'
 
 module Gisture
   include Canfig::Module
