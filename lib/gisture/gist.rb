@@ -15,15 +15,15 @@ module Gisture
     end
 
     def require!(&block)
-      require tempfile.path
+      required = require tempfile.path
       unlink_tempfile
-      block.call TOPLEVEL_BINDING if block_given?
+      block_given? ? yield : required
     end
 
     def load!(&block)
-      load tempfile.path
+      loaded = load tempfile.path
       unlink_tempfile
-      block.call TOPLEVEL_BINDING if block_given?
+      block_given? ? yield : loaded
     end
 
     def eval!(&block)
