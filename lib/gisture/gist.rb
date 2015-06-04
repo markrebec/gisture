@@ -6,8 +6,8 @@ module Gisture
 
     STRATEGIES = [:eval, :load, :require]
 
-    def self.run!(gist_id: nil, strategy: nil, filename: nil, &block)
-      new(gist_id: gist_id, strategy: strategy, filename: filename).run!(&block)
+    def self.run!(gist_id: nil, strategy: nil, filename: nil, version: nil, &block)
+      new(gist_id: gist_id, strategy: strategy, filename: filename, version: version).run!(&block)
     end
 
     def run!(&block)
@@ -40,7 +40,13 @@ module Gisture
     end
 
     def gist
-      @gist ||= github.gists.get(gist_id)
+      @gist ||= begin
+        if @version.nil?
+          github.gists.get(gist_id)
+        else
+          github.gists.version(gist_id, @version)
+        end
+      end
     end
 
     def gist_file
@@ -85,10 +91,11 @@ module Gisture
 
     protected
 
-    def initialize(gist_id: nil, strategy: nil, filename: nil)
+    def initialize(gist_id: nil, strategy: nil, filename: nil, version: nil)
       raise ArgumentError, "Invalid gist_id" if gist_id.nil?
       @gist_id = gist_id
       @filename = filename
+      @version = version
       self.strategy = strategy || :eval
     end
 
