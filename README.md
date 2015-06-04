@@ -51,11 +51,11 @@ gist = Gisture::Gist.new(gist_id: gist_id)
 gist.run!
 ```
 
-You can also pass an execution strategy (outlined further below) and optional filename (if your gist contains more than one file).
+You can also pass an execution strategy (outlined further below), optional filename (if your gist contains more than one file) and an optional version if you want to load a previous commit from the gist's history.
 
 ```ruby
-Gisture.run(gist_id, :require, 'my_file.rb')
-gist = Gisture::Gist.new(gist_id: gist_id, strategy: :require, filename: 'my_file.rb')
+Gisture.run(gist_id, :require, 'my_file.rb', 'abc123')
+gist = Gisture::Gist.new(gist_id: gist_id, strategy: :require, filename: 'my_file.rb', version: 'abc123')
 gist.run!
 ```
 
@@ -145,7 +145,6 @@ rake gisture:run[abc123,load,my_method.rb,'my_method(whatever)']
 ## TODO
 
 * Specs
-* Support for specifying a version of a gist
 * Better support for gists with multiple files
 * Allow sources other than gists, like repos containing one-off scripts, generic github blobs, local files, etc.
 
