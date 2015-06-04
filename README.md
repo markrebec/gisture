@@ -112,7 +112,7 @@ end
 ```
 
 ```ruby
-Gisture.run('123', :eval) # returns true (the result of the call to `require`)
+Gisture.run('123', :require) # returns true (the result of the call to `require`)
 do_thing_from_gist # prints "Doing the thing from the gist"
 ```
 
