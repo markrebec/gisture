@@ -2,38 +2,52 @@ require 'tempfile'
 
 module Gisture
   class Gist
-    attr_reader :filename, :gist_id, :strategy
+    attr_reader :filename, :gist_id, :strategy, :version
 
     STRATEGIES = [:eval, :load, :require]
-    GIST_ID_REGEX = /\A[0-9a-f]{20,20}\z/
-    GIST_URL_REGEX = /\Ahttp.+([0-9a-f]{20,20})\/?\z/
-    GIST_URL_WITH_VERSION_REGEX = /\Ahttp.+([0-9a-f]{20,20})\/([0-9a-f]{40,40})\/?\z/
-    def self.run!(gist_id: nil, strategy: nil, filename: nil, version: nil, &block)
-      new(gist_id: gist_id, strategy: strategy, filename: filename, version: version).run!(&block)
-    end
+    GIST_ID_REGEX = /\A[0-9a-f]{20,20}\Z/
+    GIST_URL_REGEX = /\Ahttp.+([0-9a-f]{20,20})\/?\Z/
+    GIST_URL_WITH_VERSION_REGEX = /\Ahttp.+([0-9a-f]{20,20})\/([0-9a-f]{40,40})\/?\Z/
 
-    def self.parse_gist_id(gist_id)
-      gist_id = gist_id.to_s
-      case gist_id.to_s
-      when GIST_ID_REGEX
-        gist_id
-      when GIST_URL_WITH_VERSION_REGEX
-        gist_id.match(GIST_URL_WITH_VERSION_REGEX)[1]
-      when GIST_URL_REGEX
-        gist_id.match(GIST_URL_REGEX)[1]
-      else
-        raise ArgumentError, "Invalid argument: #{gist_id} is not a gist_id or a gist's URL."
+    class << self
+      def run!(gist_id: nil, strategy: nil, filename: nil, version: nil, &block)
+        new(gist_id: gist_id, strategy: strategy, filename: filename, version: version).run!(&block)
       end
-    end
 
-    def self.parse_version(gist_id: gist_id, version: nil)
-      match = gist_id.match(GIST_URL_WITH_VERSION_REGEX)
-      if match && version
-        raise ArgumentError, "You are trying to specify a gist version in both your URL (#{gist_id}) and your version argument (#{version})."
-      elsif match
-        match[2]
-      else
-        version
+      def parse_gist_url(gist_url)
+        case gist_url.to_s
+        when GIST_URL_WITH_VERSION_REGEX
+          return [gist_url.match(GIST_URL_WITH_VERSION_REGEX)[1], gist_url.match(GIST_URL_WITH_VERSION_REGEX)[2]]
+        when GIST_URL_REGEX
+          return [gist_url.match(GIST_URL_REGEX)[1], nil]
+        else
+          raise ArgumentError, "Invalid argument: #{gist_url} is not a valid gist URL."
+        end
+      end
+
+      def parse_gist_id(gist_id)
+        gist_id = gist_id.to_s
+        case gist_id.to_s
+        when GIST_ID_REGEX
+          gist_id
+        when GIST_URL_WITH_VERSION_REGEX
+          gist_id.match(GIST_URL_WITH_VERSION_REGEX)[1]
+        when GIST_URL_REGEX
+          gist_id.match(GIST_URL_REGEX)[1]
+        else
+          raise ArgumentError, "Invalid argument: #{gist_id} is not a gist_id or a gist's URL."
+        end
+      end
+
+      def parse_version(gist_id: gist_id, version: nil)
+        match = gist_id.match(GIST_URL_WITH_VERSION_REGEX)
+        if match && version
+          raise ArgumentError, "You are trying to specify a gist version in both your URL (#{gist_id}) and your version argument (#{version})."
+        elsif match
+          match[2]
+        else
+          version
+        end
       end
     end
 
@@ -119,11 +133,17 @@ module Gisture
 
     protected
 
-    def initialize(gist_id: nil, strategy: nil, filename: nil,
-                   version: nil)
+    # TODO refactor to initialize(gist_id_or_url, strategy: nil, filename: nil, version: nil)
+    def initialize(gist_id: nil, gist_url: nil, strategy: nil, filename: nil, version: nil)
       @filename = filename
-      @gist_id = self.parse_gist_id(gist_id)
-      @version = self.parse_version(gist_id: gist_id, version: version)
+      if !gist_id.nil?
+        @gist_id = gist_id
+        @version = version
+      elsif !gist_url.nil?
+        @gist_id, @version = self.class.parse_gist_url(gist_url)
+      else
+        raise ArgumentError, "You must provide one of gist_id or gist_url"
+      end
       self.strategy = strategy || :eval
     end
 

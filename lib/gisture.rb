@@ -23,7 +23,11 @@ module Gisture
   end
 
   def self.new(gist_id, strategy=nil, filename=nil, version=nil)
-    Gisture::Gist.new(gist_id: gist_id, strategy: strategy, filename: filename, version: version)
+    if gist_id.match(/[^a-z0-9]+/i) # it's probably a URL
+      Gisture::Gist.new(gist_url: gist_id, strategy: strategy, filename: filename, version: version)
+    else
+      Gisture::Gist.new(gist_id: gist_id, strategy: strategy, filename: filename, version: version)
+    end
   end
 
   def self.run(gist_id, strategy=nil, filename=nil, version=nil, &block)
