@@ -12,6 +12,13 @@ Execute one-off gists inline or in the background.
 Gisture.run('c3b478ef0592eacad361')
 ```
 
+For convenience, you can also use gist.github.com URLs, with or without revision information in them
+
+```ruby
+Gisture.run('https://gist.github.com/markrebec/c3b478ef0592eacad361')
+Gisture.run('https://gist.github.com/markrebec/c3b478ef0592eacad361/7714df11a3babaa78f27027844ac2f0c1a8348c1')
+```
+
 The above will run [this gist](https://gist.github.com/markrebec/c3b478ef0592eacad361) and print "You are using Gisture version 0.0.2"
 
 ## Getting Started
