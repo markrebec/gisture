@@ -23,15 +23,11 @@ module Gisture
     config.tmpdir         = Dir.tmpdir  # location to store gist tempfiles
   end
 
-  def self.new(gist_id, strategy=nil, filename=nil, version=nil)
-    if gist_id.match(/[^a-z0-9]+/i) # it's probably a URL
-      Gisture::Gist.new(gist_url: gist_id, strategy: strategy, filename: filename, version: version)
-    else
-      Gisture::Gist.new(gist_id: gist_id, strategy: strategy, filename: filename, version: version)
-    end
+  def self.new(gist, strategy: nil, filename: nil, version: nil)
+    Gisture::Gist.new(gist, strategy: strategy, filename: filename, version: version)
   end
 
-  def self.run(gist_id, strategy=nil, filename=nil, version=nil, &block)
-    new(gist_id, strategy, filename, version).run!(&block)
+  def self.run(gist, strategy: nil, filename: nil, version: nil, &block)
+    new(gist, strategy, filename, version).run!(&block)
   end
 end
