@@ -54,15 +54,15 @@ There are a couple ways to load and run a gist. You can use the `Gisture::Gist` 
 ```ruby
 Gisture.run(gist_id)
 Gisture.new(gist_id).run!
-gist = Gisture::Gist.new(gist_id: gist_id)
+gist = Gisture::Gist.new(gist_id)
 gist.run!
 ```
 
 You can also pass an execution strategy (outlined further below), optional filename (if your gist contains more than one file) and an optional version if you want to load a previous commit from the gist's history.
 
 ```ruby
-Gisture.run(gist_id, :require, 'my_file.rb', 'abc123')
-gist = Gisture::Gist.new(gist_id: gist_id, strategy: :require, filename: 'my_file.rb', version: 'abc123')
+Gisture.run(gist_id, strategy: :require, filename: 'my_file.rb', version: 'abc123')
+gist = Gisture::Gist.new(gist_id, strategy: :require, filename: 'my_file.rb', version: 'abc123')
 gist.run!
 ```
 
@@ -103,7 +103,7 @@ end
 ```
 
 ```ruby
-e = Gisture.run('123', :eval) # returns a Gisture::Evaluator
+e = Gisture.run('123', strategy: :eval) # returns a Gisture::Evaluator
 e.do_thing_from_gist # prints "Doing the thing from the gist"
 ```
 
@@ -119,7 +119,7 @@ end
 ```
 
 ```ruby
-Gisture.run('123', :require) # returns true (the result of the call to `require`)
+Gisture.run('123', strategy: :require) # returns true (the result of the call to `require`)
 do_thing_from_gist # prints "Doing the thing from the gist"
 ```
 
@@ -132,21 +132,22 @@ The load strategy puts the contents of the gist into a tempfile and uses ruby's 
 If your gist contains more than one file, you'll need to tell gisture which file you'd like to run. You can do this by passing the appropriate argument when creating a gist.
 
 ```ruby
-Gisture.new('123', :load, 'myfile.rb')
-Gisture::Gist.new(gist_id: '123', filename: 'myfile.rb')
+Gisture.new('123', filename: 'myfile.rb')
+Gisture::Gist.new('123', filename: 'myfile.rb')
 ```
 
 ### Rake Task
 
 Gisture also provides a built-in rake task, named `gisture:run`, to easily run one-off tasks in the background. If you're using rails, the gisture railtie will automatically include the task for you, otherwise you can include the tasks found in `lib/tasks/gisture.rake` however is appropriate for your project.
 
-You can call the rake task with your gist ID as well as an optional strategy, filename and callback string (which will be eval'd as a callback block).
+You can call the rake task with your gist ID as well as an optional strategy, filename, version and callback string (which will be eval'd as a callback block).
 
 ```
 rake gisture:run[abc123]
 rake gisture:run[abc123,load]
 rake gisture:run[abc123,eval,my_file.rb]
-rake gisture:run[abc123,load,my_method.rb,'my_method(whatever)']
+rake gisture:run[abc123,eval,my_file.rb,123abc]
+rake gisture:run[abc123,load,my_method.rb,123abc,'my_method(whatever)']
 ```
 
 ## TODO
