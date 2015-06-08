@@ -21,6 +21,8 @@ Gisture.run('https://gist.github.com/markrebec/c3b478ef0592eacad361/7714df11a3ba
 
 The above will run [this gist](https://gist.github.com/markrebec/c3b478ef0592eacad361) and print "You are using Gisture version 0.0.2"
 
+**Note:** I'm still fleshing out what the final version of the API will look like. I'll be making every effort to keep things backwards compatible while working towards a 1.0 release, but you should expect some things to change.
+
 ## Getting Started
 
 Add the gem to your project's Gemfile:
