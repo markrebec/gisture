@@ -36,7 +36,7 @@ module Gisture
 
     def github
       @github ||= begin
-        github_config = Gisture::GITHUB_CONFIG_OPTS.map { |key| [key, Gisture.configuration.send(key)] }.to_h
+        github_config = Hash[Gisture::GITHUB_CONFIG_OPTS.map { |key| [key, Gisture.configuration.send(key)] }]
         Github.new(github_config)
       end
     end
