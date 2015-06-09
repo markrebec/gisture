@@ -82,10 +82,6 @@ RSpec.describe Gisture::Gist do
   describe "#gist" do
     subject { Gisture::Gist.new(TEST_GIST_ID) }
 
-    it "is a github_api response" do
-      expect(subject.gist).to be_a(Github::ResponseWrapper)
-    end
-
     it "is the gist that was requested" do
       expect(subject.gist.id).to eql(TEST_GIST_ID)
     end
