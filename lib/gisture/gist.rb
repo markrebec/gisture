@@ -97,13 +97,15 @@ module Gisture
     def initialize(gist, strategy: nil, filename: nil, version: nil)
       self.strategy = strategy || :eval
       @filename = filename
-      @version = version
 
       if gist.match(/[^a-f0-9]+/i) # non-hex chars, probably a URL
         @gist_id, @version = parse_gist_url(gist)
+        @version = version unless version.nil?
       else
         @gist_id = gist
+        @version = version
       end
+
     end
 
     def unlink_tempfile
