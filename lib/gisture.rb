@@ -3,6 +3,7 @@ require 'github_api'
 require 'gisture/github_api/client/gists'
 require 'gisture/version'
 require 'gisture/evaluator'
+require 'gisture/file'
 require 'gisture/gist'
 require 'gisture/railtie' if defined?(Rails)
 

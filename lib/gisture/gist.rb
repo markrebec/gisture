@@ -1,5 +1,3 @@
-require 'tempfile'
-
 module Gisture
   class Gist
     attr_reader :filename, :gist_id, :strategy, :version
@@ -17,21 +15,15 @@ module Gisture
     end
 
     def require!(&block)
-      required = require tempfile.path
-      unlink_tempfile
-      block_given? ? yield : required
+      file.require! &block
     end
 
     def load!(&block)
-      loaded = load tempfile.path
-      unlink_tempfile
-      block_given? ? yield : loaded
+      file.load! &block
     end
 
     def eval!(&block)
-      clean_room = Evaluator.new(raw)
-      clean_room.instance_eval &block if block_given?
-      clean_room
+      file.eval! &block
     end
 
     def github
@@ -51,36 +43,23 @@ module Gisture
       end
     end
 
-    def gist_file
-      return @gist_file unless @gist_file.nil?
+    def file
+      return @file unless @file.nil?
 
       if gist.files.count > 1
         raise ArgumentError, "You must specify a filename if your gist contains more than one file" if filename.nil?
-        @gist_file = gist.files[filename]
-        raise ArgumentError, "The filename '#{filename}' was not found in the list of files for the gist '#{gist_id}'" if @gist_file.nil?
+        @file = Gisture::File.new(gist.files[filename], gist_id)
+        raise ArgumentError, "The filename '#{filename}' was not found in the list of files for the gist '#{gist_id}'" if @file.nil?
       else
-        @gist_file = gist.files.first[1]
+        @file = Gisture::File.new(gist.files.first[1], gist_id)
       end
 
-      @gist_file
-    end
-
-    def raw
-      gist_file.content
+      @file
     end
 
     def strategy=(strat)
       raise ArgumentError, "Invalid strategy '#{strat}'. Must be one of #{STRATEGIES.join(', ')}" unless STRATEGIES.include?(strat.to_sym)
       @strategy = strat.to_sym
-    end
-
-    def tempfile
-      @tempfile ||= begin
-        file = Tempfile.new([gist_id, ::File.extname(gist_file.filename)], Gisture.configuration.tmpdir)
-        file.write(raw)
-        file.close
-        file
-      end
     end
 
     def to_h
@@ -104,11 +83,6 @@ module Gisture
         @version = version
       end
 
-    end
-
-    def unlink_tempfile
-      tempfile.unlink
-      @tempfile = nil
     end
 
     def parse_gist_url(gist_url)

@@ -87,14 +87,14 @@ RSpec.describe Gisture::Gist do
     end
   end
 
-  describe "#gist_file" do
+  describe "#file" do
     it "returns an Hashie" do
-      expect(Gisture::Gist.new(TEST_GIST_ID).gist_file).to be_a(Hashie::Mash)
+      expect(Gisture::Gist.new(TEST_GIST_ID).file).to be_a(Gisture::File)
     end
 
     context "when a gist contains a single file" do
       it "returns the file" do
-        expect(Gisture::Gist.new(TEST_GIST_ID).gist_file.filename).to eql(TEST_GIST_FILENAME)
+        expect(Gisture::Gist.new(TEST_GIST_ID).file.filename).to eql(TEST_GIST_FILENAME)
       end
     end
 
@@ -103,7 +103,7 @@ RSpec.describe Gisture::Gist do
         subject { Gisture::Gist.new(MULTI_FILE_TEST_GIST_ID, filename: MULTI_FILE_TEST_GIST_FILENAMES.sample) }
 
         it "returns the specified file" do
-          expect(subject.gist_file.filename).to eql(subject.filename)
+          expect(subject.file.filename).to eql(subject.filename)
         end
       end
 
@@ -111,17 +111,9 @@ RSpec.describe Gisture::Gist do
         subject { Gisture::Gist.new(MULTI_FILE_TEST_GIST_ID) }
 
         it "raises an ArgumentError" do
-          expect { subject.gist_file }.to raise_exception(ArgumentError)
+          expect { subject.file }.to raise_exception(ArgumentError)
         end
       end
-    end
-  end
-
-  describe "#raw" do
-    subject { Gisture::Gist.new(TEST_GIST_ID) }
-
-    it "returns the raw gist content" do
-      expect(subject.raw).to eql(subject.gist_file.content)
     end
   end
 
@@ -142,6 +134,8 @@ RSpec.describe Gisture::Gist do
     end
   end
 
+# TODO move this to file spec
+=begin
   describe "#tempfile" do
     subject { Gisture::Gist.new(TEST_GIST_ID) }
 
@@ -155,7 +149,7 @@ RSpec.describe Gisture::Gist do
     end
 
     it "uses the same extension as the gist's filename" do
-      expect(::File.extname(subject.tempfile.path)).to eql(::File.extname(subject.gist_file.filename))
+      expect(::File.extname(subject.tempfile.path)).to eql(::File.extname(subject.file.filename))
     end
 
     it "creates the file in the configured tempdir" do
@@ -177,6 +171,7 @@ RSpec.describe Gisture::Gist do
       end
     end
   end
+=end
 
   describe "#to_h" do
     subject { Gisture::Gist.new(TEST_GIST_ID, filename: "test.rb") }
