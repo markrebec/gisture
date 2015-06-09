@@ -36,10 +36,12 @@ module Gisture
     def gist
       @gist ||= begin
         if @version.nil?
-          github.gists.get(gist_id)
+          g = github.gists.get(gist_id)
         else
-          github.gists.version(gist_id, @version)
+          g = github.gists.version(gist_id, @version)
         end
+        raise OwnerBlacklisted.new(g.owner.login) unless Gisture.configuration.whitelisted?(g.owner.login)
+        g
       end
     end
 

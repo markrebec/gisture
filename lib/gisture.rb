@@ -2,6 +2,7 @@ require 'canfig'
 require 'github_api'
 require 'gisture/github_api/client/gists'
 require 'gisture/version'
+require 'gisture/errors'
 require 'gisture/evaluator'
 require 'gisture/file'
 require 'gisture/gist'
@@ -24,6 +25,11 @@ module Gisture
 
     config.strategy       = :eval       # default execution strategy
     config.tmpdir         = Dir.tmpdir  # location to store gist tempfiles
+    config.owners         = nil         # only allow gists/repos/etc. from whitelisted owners (str/sym/arr)
+
+    def whitelisted?(owner)
+      owners.nil? || owners.empty? || [owners].flatten.map(&:to_s).include?(owner)
+    end
   end
 
   def self.new(gist, strategy: nil, filename: nil, version: nil)

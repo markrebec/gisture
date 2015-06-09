@@ -95,6 +95,44 @@ RSpec.describe Gisture::Gist do
     it "is the gist that was requested" do
       expect(subject.gist.id).to eql(TEST_GIST_ID)
     end
+
+    context "when whitelisted owners have been configured" do
+      context "and the gist owner is whitelisted" do
+        it "does not raise an error" do
+          begin
+            Gisture.configure do |config|
+              config.owners = [:markrebec]
+            end
+
+            expect { Gisture::Gist.new(TEST_GIST_ID).gist }.to_not raise_exception
+          rescue => e
+            raise e
+          ensure
+            Gisture.configure do |config|
+              config.owners = nil
+            end
+          end
+        end
+      end
+
+      context "and the gist owner is not whitelisted" do
+        it "raises a OwnerBlacklisted error" do
+          begin
+            Gisture.configure do |config|
+              config.owners = [:tester]
+            end
+
+            expect { Gisture::Gist.new(TEST_GIST_ID).gist }.to raise_exception(Gisture::OwnerBlacklisted)
+          rescue => e
+            raise e
+          ensure
+            Gisture.configure do |config|
+              config.owners = nil
+            end
+          end
+        end
+      end
+    end
   end
 
   describe "#file" do
