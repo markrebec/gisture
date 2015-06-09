@@ -45,6 +45,7 @@ Gisture.configure do |config|
   config.user           = nil # global user used in requets if none provided
   config.org            = nil # global organization used in request if none provided
 
+  config.strategy       = :eval       # default execution strategy
   config.tmpdir         = Dir.tmpdir  # location to store gist tempfiles when using the require or load strategies
 end
 ```

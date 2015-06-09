@@ -72,7 +72,7 @@ module Gisture
     protected
 
     def initialize(gist, strategy: nil, filename: nil, version: nil)
-      self.strategy = strategy || :eval
+      self.strategy = strategy || Gisture.configuration.strategy
       @filename = filename
 
       if gist.match(/[^a-f0-9]+/i) # non-hex chars, probably a URL
