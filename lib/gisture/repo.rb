@@ -24,6 +24,7 @@ module Gisture
 
     def initialize(repo)
       @owner, @project = parse_repo_url(repo)
+      raise OwnerBlacklisted.new(owner) unless Gisture.configuration.whitelisted?(owner)
     end
 
     def parse_repo_url(repo_url)
