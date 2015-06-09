@@ -56,19 +56,17 @@ module Gisture
 
       if gist.files.count > 1
         raise ArgumentError, "You must specify a filename if your gist contains more than one file" if filename.nil?
-        gist.files.each do |file|
-          @gist_file = file if file[0] == filename
-        end
+        @gist_file = gist.files[filename]
         raise ArgumentError, "The filename '#{filename}' was not found in the list of files for the gist '#{gist_id}'" if @gist_file.nil?
       else
-        @gist_file = gist.files.first
+        @gist_file = gist.files.first[1]
       end
 
       @gist_file
     end
 
     def raw
-      gist_file[1].content
+      gist_file.content
     end
 
     def strategy=(strat)
@@ -78,7 +76,7 @@ module Gisture
 
     def tempfile
       @tempfile ||= begin
-        file = Tempfile.new([gist_id, ::File.extname(gist_file[0])], Gisture.configuration.tmpdir)
+        file = Tempfile.new([gist_id, ::File.extname(gist_file.filename)], Gisture.configuration.tmpdir)
         file.write(raw)
         file.close
         file

@@ -88,19 +88,13 @@ RSpec.describe Gisture::Gist do
   end
 
   describe "#gist_file" do
-    it "returns an array" do
-      expect(Gisture::Gist.new(TEST_GIST_ID).gist_file).to be_a(Array)
-    end
-
-    it "contains the filename and file object" do
-      gist = Gisture::Gist.new(TEST_GIST_ID)
-      expect(gist.gist_file[0]).to eql(TEST_GIST_FILENAME)
-      expect(gist.gist_file[1]).to be_a(Hashie::Mash)
+    it "returns an Hashie" do
+      expect(Gisture::Gist.new(TEST_GIST_ID).gist_file).to be_a(Hashie::Mash)
     end
 
     context "when a gist contains a single file" do
       it "returns the file" do
-        expect(Gisture::Gist.new(TEST_GIST_ID).gist_file[0]).to eql(TEST_GIST_FILENAME)
+        expect(Gisture::Gist.new(TEST_GIST_ID).gist_file.filename).to eql(TEST_GIST_FILENAME)
       end
     end
 
@@ -109,7 +103,7 @@ RSpec.describe Gisture::Gist do
         subject { Gisture::Gist.new(MULTI_FILE_TEST_GIST_ID, filename: MULTI_FILE_TEST_GIST_FILENAMES.sample) }
 
         it "returns the specified file" do
-          expect(subject.gist_file[0]).to eql(subject.filename)
+          expect(subject.gist_file.filename).to eql(subject.filename)
         end
       end
 
@@ -127,7 +121,7 @@ RSpec.describe Gisture::Gist do
     subject { Gisture::Gist.new(TEST_GIST_ID) }
 
     it "returns the raw gist content" do
-      expect(subject.raw).to eql(subject.gist_file[1].content)
+      expect(subject.raw).to eql(subject.gist_file.content)
     end
   end
 
@@ -161,7 +155,7 @@ RSpec.describe Gisture::Gist do
     end
 
     it "uses the same extension as the gist's filename" do
-      expect(::File.extname(subject.tempfile.path)).to eql(::File.extname(subject.gist_file[0]))
+      expect(::File.extname(subject.tempfile.path)).to eql(::File.extname(subject.gist_file.filename))
     end
 
     it "creates the file in the configured tempdir" do
