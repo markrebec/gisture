@@ -9,6 +9,14 @@ Gisture.configure do |config|
   config.oauth_token = ENV['GITHUB_OAUTH_TOKEN']
 end
 
+TEST_GIST_ID = "520b474ea0248d1a0a74"
+TEST_GIST_URL = "https://gist.github.com/markrebec/520b474ea0248d1a0a74"
+TEST_GIST_VERSION = "49a9d887eeb8c723ab23deddfbbb75d4b70e8014"
+TEST_GIST_VERSION_URL = "https://gist.github.com/markrebec/520b474ea0248d1a0a74/49a9d887eeb8c723ab23deddfbbb75d4b70e8014"
+TEST_GIST_FILENAME = "test.rb"
+MULTI_FILE_TEST_GIST_ID = "0417bf78a7c2b825b4ef"
+MULTI_FILE_TEST_GIST_FILENAMES = ['file_one.rb', 'file_two.rb']
+
 RSpec.configure do |config|
   #config.before(:suite) do
   #  ActiveRecord::Base.establish_connection adapter: "sqlite3", database: ":memory:"

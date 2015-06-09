@@ -1,13 +1,5 @@
 require "spec_helper"
 
-TEST_GIST_ID = "520b474ea0248d1a0a74"
-TEST_GIST_URL = "https://gist.github.com/markrebec/520b474ea0248d1a0a74"
-TEST_GIST_VERSION = "49a9d887eeb8c723ab23deddfbbb75d4b70e8014"
-TEST_GIST_VERSION_URL = "https://gist.github.com/markrebec/520b474ea0248d1a0a74/49a9d887eeb8c723ab23deddfbbb75d4b70e8014"
-TEST_GIST_FILENAME = "test.rb"
-MULTI_FILE_TEST_GIST_ID = "0417bf78a7c2b825b4ef"
-MULTI_FILE_TEST_GIST_FILENAMES = ['file_one.rb', 'file_two.rb']
-
 RSpec.describe Gisture::Gist do
   context "when passing a gist ID" do
     it "sets the gist ID as the gist_id" do
@@ -88,7 +80,7 @@ RSpec.describe Gisture::Gist do
   end
 
   describe "#file" do
-    it "returns an Hashie" do
+    it "returns a Gisture::File" do
       expect(Gisture::Gist.new(TEST_GIST_ID).file).to be_a(Gisture::File)
     end
 
@@ -133,45 +125,6 @@ RSpec.describe Gisture::Gist do
       end
     end
   end
-
-# TODO move this to file spec
-=begin
-  describe "#tempfile" do
-    subject { Gisture::Gist.new(TEST_GIST_ID) }
-
-    it "creates and returns a tempfile" do
-      expect(subject.tempfile).to be_a(Tempfile)
-    end
-
-    it "uses the gist_id as the base of the filename" do
-      matched = ::File.basename(subject.tempfile.path).match(/#{TEST_GIST_ID}/)
-      expect(matched).to_not be_nil
-    end
-
-    it "uses the same extension as the gist's filename" do
-      expect(::File.extname(subject.tempfile.path)).to eql(::File.extname(subject.file.filename))
-    end
-
-    it "creates the file in the configured tempdir" do
-      tmp_path = ::File.join(::File.dirname(__FILE__), '../', 'tmp')
-      begin
-        FileUtils.mkdir_p tmp_path
-        Gisture.configure do |config|
-          config.tmpdir = tmp_path
-        end
-
-        expect(::File.dirname(subject.tempfile.path)).to eql(tmp_path)
-      rescue => e
-        raise e
-      ensure
-        Gisture.configure do |config|
-          config.tmpdir = Dir.tmpdir
-        end
-        FileUtils.rm_rf tmp_path
-      end
-    end
-  end
-=end
 
   describe "#to_h" do
     subject { Gisture::Gist.new(TEST_GIST_ID, filename: "test.rb") }
