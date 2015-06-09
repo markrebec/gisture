@@ -5,6 +5,7 @@ require 'gisture/version'
 require 'gisture/evaluator'
 require 'gisture/file'
 require 'gisture/gist'
+require 'gisture/repo'
 require 'gisture/railtie' if defined?(Rails)
 
 module Gisture
@@ -29,7 +30,20 @@ module Gisture
     Gisture::Gist.new(gist, strategy: strategy, filename: filename, version: version)
   end
 
+  def self.gist(gist, strategy: nil, filename: nil, version: nil)
+    new(gist, strategy, filename, version)
+  end
+
   def self.run(gist, strategy: nil, filename: nil, version: nil, &block)
     new(gist, strategy, filename, version).run!(&block)
+  end
+
+  def self.repo(repo)
+    Gisture::Repo.new(repo)
+  end
+
+  def self.file(repo, path, strategy: nil)
+    # TODO parse repo/path out of a url
+    Gisture::Repo.new(repo).file(path, strategy: strategy)
   end
 end
