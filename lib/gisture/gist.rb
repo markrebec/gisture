@@ -78,7 +78,7 @@ module Gisture
 
     def tempfile
       @tempfile ||= begin
-        file = Tempfile.new([gist_id, File.extname(gist_file[0])], Gisture.configuration.tmpdir)
+        file = Tempfile.new([gist_id, ::File.extname(gist_file[0])], Gisture.configuration.tmpdir)
         file.write(raw)
         file.close
         file

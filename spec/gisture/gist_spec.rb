@@ -156,23 +156,23 @@ RSpec.describe Gisture::Gist do
     end
 
     it "uses the gist_id as the base of the filename" do
-      matched = File.basename(subject.tempfile.path).match(/#{TEST_GIST_ID}/)
+      matched = ::File.basename(subject.tempfile.path).match(/#{TEST_GIST_ID}/)
       expect(matched).to_not be_nil
     end
 
     it "uses the same extension as the gist's filename" do
-      expect(File.extname(subject.tempfile.path)).to eql(File.extname(subject.gist_file[0]))
+      expect(::File.extname(subject.tempfile.path)).to eql(::File.extname(subject.gist_file[0]))
     end
 
     it "creates the file in the configured tempdir" do
-      tmp_path = File.join(File.dirname(__FILE__), '../', 'tmp')
+      tmp_path = ::File.join(::File.dirname(__FILE__), '../', 'tmp')
       begin
         FileUtils.mkdir_p tmp_path
         Gisture.configure do |config|
           config.tmpdir = tmp_path
         end
 
-        expect(File.dirname(subject.tempfile.path)).to eql(tmp_path)
+        expect(::File.dirname(subject.tempfile.path)).to eql(tmp_path)
       rescue => e
         raise e
       ensure
