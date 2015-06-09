@@ -1,6 +1,6 @@
 require "spec_helper"
 
-RSpec.describe Gisture::Gist do
+RSpec.describe Gisture::File do
   subject { Gisture::File.new(Gisture::Gist.new(TEST_GIST_ID).gist.files.first[1], basename: TEST_GIST_ID) }
 
   it "delegates missing methods to the file hash" do
