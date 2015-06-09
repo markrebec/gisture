@@ -63,6 +63,24 @@ RSpec.describe Gisture::Gist do
     end
   end
 
+  context "when not passing a strategy" do
+    it "uses the default configured strategy" do
+      begin
+        Gisture.configure do |config|
+          config.strategy = :load
+        end
+
+        expect(Gisture::Gist.new(TEST_GIST_ID).strategy).to eql(:load)
+      rescue => e
+        raise e
+      ensure
+        Gisture.configure do |config|
+          config.strategy = :eval
+        end
+      end
+    end
+  end
+
   describe "#github" do
     subject { Gisture::Gist.new(TEST_GIST_ID) }
 
