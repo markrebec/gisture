@@ -47,6 +47,7 @@ Gisture.configure do |config|
 
   config.strategy       = :eval       # default execution strategy
   config.tmpdir         = Dir.tmpdir  # location to store gist tempfiles when using the require or load strategies
+  config.owners         = nil         # only allow gists/repos/etc. from whitelisted owners (str/sym/arr)
 end
 ```
 
