@@ -83,4 +83,12 @@ RSpec.describe Gisture::Repo do
     context "when the file doesn't exist" do
     end
   end
+
+  describe '.file' do
+    context "when the repo doesn't exist" do
+    end
+
+    context "when the file doesn't exist" do
+    end
+  end
 end
