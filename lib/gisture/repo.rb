@@ -10,6 +10,10 @@ module Gisture
         new(repo).file(file, strategy: strategy)
       end
 
+      def run!(path, strategy: nil, &block)
+        file(path, strategy: strategy).run!(&block)
+      end
+
       def parse_repo_url(repo_url)
         matched = repo_url.match(REPO_URL_REGEX)
         raise ArgumentError, "Invalid argument: '#{repo_url}' is not a valid repo URL." if matched.nil?
@@ -38,6 +42,10 @@ module Gisture
       file['filename'] = ::File.basename(file['path'])
       file['content'] = Base64.decode64(file['content'])
       Gisture::File.new(file, basename: "#{owner}-#{project}", strategy: strategy)
+    end
+
+    def run!(path, strategy: nil, &block)
+      file(path, strategy: strategy).run!(&block)
     end
 
     protected
