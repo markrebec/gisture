@@ -48,8 +48,7 @@ module Gisture
     Gisture::Repo.new(repo)
   end
 
-  def self.file(repo, path, strategy: nil)
-    # TODO parse repo/path out of a url
-    Gisture::Repo.new(repo).file(path, strategy: strategy)
+  def self.file(path, strategy: nil)
+    Gisture::Repo.file(path, strategy: strategy)
   end
 end

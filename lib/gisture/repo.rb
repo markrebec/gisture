@@ -1,7 +1,27 @@
 module Gisture
   class Repo
     attr_reader :owner, :project
-    REPO_URL_REGEX = /\A((http[s]?:\/\/)?github\.com\/)?([a-z0-9_-]*)\/([a-z0-9_-]*)\/?\Z/
+    REPO_URL_REGEX = /\A((http[s]?:\/\/)?github\.com\/)?([a-z0-9_\-\.]*)\/([a-z0-9_\-\.]*)\/?\Z/i
+    FILE_URL_REGEX = /\A((http[s]?:\/\/)?github\.com\/)?(([a-z0-9_\-\.]*)\/([a-z0-9_\-\.]*))(\/[a-z0-9_\-\.\/]+)\Z/i
+
+    class << self
+      def file(path, strategy: nil)
+        repo, file = parse_file_url(path)
+        new(repo).file(file, strategy: strategy)
+      end
+
+      def parse_repo_url(repo_url)
+        matched = repo_url.match(REPO_URL_REGEX)
+        raise ArgumentError, "Invalid argument: '#{repo_url}' is not a valid repo URL." if matched.nil?
+        [matched[3], matched[4]]
+      end
+
+      def parse_file_url(file_url)
+        matched = file_url.match(FILE_URL_REGEX)
+        raise ArgumentError, "Invalid argument: '#{file_url}' is not a valid file path." if matched.nil?
+        [matched[3], matched[6]]
+      end
+    end
 
     def github
       @github ||= begin
@@ -23,14 +43,8 @@ module Gisture
     protected
 
     def initialize(repo)
-      @owner, @project = parse_repo_url(repo)
+      @owner, @project = self.class.parse_repo_url(repo)
       raise OwnerBlacklisted.new(owner) unless Gisture.configuration.whitelisted?(owner)
-    end
-
-    def parse_repo_url(repo_url)
-      matched = repo_url.match(REPO_URL_REGEX)
-      raise ArgumentError, "Invalid argument: '#{repo_url}' is not a valid repo URL." if matched.nil?
-      [matched[3], matched[4]]
     end
 
     def github_config
