@@ -80,6 +80,10 @@ gist = Gisture::Gist.new(gist_id, strategy: :require, filename: 'my_file.rb', ve
 gist.run!
 ```
 
+#### Multiple Files
+
+If your gist contains more than one file, you can provide the optional `filename` parameter to specify which file you'd like to run. **If you do not specify a `filename` argument, the first file in your gist will be chosen automatically.**
+
 ### Repositories & Files
 
 Gisture doesn't only run gists. It also allows you to one-off include/execute any file within a github repository the same way you can a gist. The syntax is similar, and all the same logic outlined below regarding callbacks, execution strategies, etc. applies to these files as well as gists.

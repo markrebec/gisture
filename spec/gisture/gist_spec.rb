@@ -158,8 +158,8 @@ RSpec.describe Gisture::Gist do
       context "and no filename is present" do
         subject { Gisture::Gist.new(MULTI_FILE_TEST_GIST_ID) }
 
-        it "raises an ArgumentError" do
-          expect { subject.file }.to raise_exception(ArgumentError)
+        it "uses the first file in the gist" do
+          expect(subject.file.filename).to eql(MULTI_FILE_TEST_GIST_FILENAMES.first)
         end
       end
     end

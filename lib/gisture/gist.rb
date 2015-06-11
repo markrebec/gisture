@@ -48,8 +48,7 @@ module Gisture
     def file
       return @file unless @file.nil?
 
-      if gist.files.count > 1
-        raise ArgumentError, "You must specify a filename if your gist contains more than one file" if filename.nil?
+      if gist.files.count > 1 && !filename.nil?
         @file = Gisture::File.new(gist.files[filename], basename: gist_id, strategy: strategy)
         raise ArgumentError, "The filename '#{filename}' was not found in the list of files for the gist '#{gist_id}'" if @file.nil?
       else
