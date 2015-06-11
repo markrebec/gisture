@@ -12,7 +12,7 @@ Execute one-off gists inline or in the background.
 Gisture.run('c3b478ef0592eacad361')
 ```
 
-For convenience, you can also use gist.github.com URLs, with or without revision information in them
+For convenience, you can also use gist.github.com URLs, with or without revision information in them.
 
 ```ruby
 Gisture.run('https://gist.github.com/markrebec/c3b478ef0592eacad361')
@@ -20,6 +20,13 @@ Gisture.run('https://gist.github.com/markrebec/c3b478ef0592eacad361/7714df11a3ba
 ```
 
 The above will run [this gist](https://gist.github.com/markrebec/c3b478ef0592eacad361) and print "You are using Gisture version VERSION" (whatever version of gisture you're using)
+
+Don't uses gists, but have a public or private github repo where you store snippets, scripts, etc.? You can also use gisture with github repos.
+
+```ruby
+Gisture.file('markrebec/gisture/lib/gisture/version.rb').run!
+Gisture.repo('markrebec/gisture').run!('lib/gisture/version.rb')
+```
 
 **Note:** I'm still fleshing out what the final version of the API will look like. I'll be making every effort to keep things backwards compatible while working towards a 1.0 release, but you should expect some things to change.
 
@@ -33,7 +40,7 @@ Then run `bundle install`. Or install gisture system wide with `gem install gist
 
 ### Configuration
 
-Gisture uses the [github_api](http://peter-murach.github.io/github/) gem to load gists, and passes through a couple configuration options (mostly around authentication). You can configure these options and any other gisture options using `Gisture.configure` with a block wherever appropriate for your project (for example in a rails config initializer). Below is an example along with list of all gisture config options and their defaults.
+Gisture uses the [github_api](http://peter-murach.github.io/github/) gem to load gists, and passes through a subset of configuration options, mostly around authentication. You can configure these options and all other gisture options using `Gisture.configure` with a block wherever is appropriate for your project (for example in a rails config initializer). Below is an example along with list of all gisture config options and their defaults.
 
 ```ruby
 Gisture.configure do |config|
@@ -51,8 +58,11 @@ Gisture.configure do |config|
 end
 ```
 
+Most of the options are self explanatory or easily explained in their associated comments above. The one that's worth elaborating on is `config.owners`. Setting this option to a symbol, string or array enables whitelisting by owner(s) and will force gisture to only allow running gists or files from repos owned by these whitelisted owners. If you enable whitelisting and try to run a gist or file owned by a user/org not included in the whitelist, gisture will raise an exception and let you know.
+
 ## Usage
 
+### Gists
 There are a couple ways to load and run a gist. You can use the `Gisture::Gist` class directly, or use shortcut methods directly on the `Gisture` module. The only required argument is the ID of the gist with which you'd like to work.
 
 ```ruby
@@ -68,6 +78,24 @@ You can also pass an execution strategy (outlined further below), optional filen
 Gisture.run(gist_id, strategy: :require, filename: 'my_file.rb', version: 'abc123')
 gist = Gisture::Gist.new(gist_id, strategy: :require, filename: 'my_file.rb', version: 'abc123')
 gist.run!
+```
+
+### Repositories & Files
+
+Gisture doesn't only run gists. It also allows you to one-off include/execute any file within a github repository the same way you can a gist. The syntax is similar, and all the same logic outlined below regarding callbacks, execution strategies, etc. applies to these files as well as gists.
+
+```ruby
+file = Gisture.file('markrebec/gisture/lib/gisture/version.rb')
+file.run!
+Gisture.repo('markrebec/gisture').file('lib/gisture/version.rb').run!
+Gisture::Repo.new('markrebec/gisture').run!('lib/gisture/version.rb')
+```
+
+Like gists, you can pass an execution strategy when running a file from a repo.
+
+```ruby
+Gisture.file('markrebec/gisture/lib/gisture/version.rb', strategy: :require).run!
+Gisture.repo('markrebec/gisture').file('lib/gisture/version.rb', strategy: :require).run!
 ```
 
 ### Callbacks
