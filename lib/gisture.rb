@@ -37,11 +37,11 @@ module Gisture
   end
 
   def self.gist(gist, strategy: nil, filename: nil, version: nil)
-    new(gist, strategy, filename, version)
+    new(gist, strategy: strategy, filename: filename, version: version)
   end
 
   def self.run(gist, strategy: nil, filename: nil, version: nil, &block)
-    new(gist, strategy, filename, version).run!(&block)
+    new(gist, strategy: strategy, filename: filename, version: version).run!(&block)
   end
 
   def self.repo(repo)

@@ -1,8 +1,62 @@
 require "spec_helper"
 
 RSpec.describe Gisture do
-  SAMPLE_GIST_ID = "c3b478ef0592eacad361".freeze
-  SAMPLE_GIST_VERSION = "7714df11a3babaa78f27027844ac2f0c1a8348c1".freeze
-  SAMPLE_GIST_URL = "https://gist.github.com/markrebec/#{SAMPLE_GIST_ID}".freeze
-  SAMPLE_GIST_URL_WITH_VERSION = "https://gist.github.com/markrebec/#{SAMPLE_GIST_ID}/#{SAMPLE_GIST_VERSION}".freeze
+  describe '.new' do
+    it 'returns a new Gisture::Gist' do
+      expect(Gisture.new(TEST_GIST_ID)).to be_a(Gisture::Gist)
+    end
+
+    context 'with arguments' do
+      it 'passes the arguments to the gist' do
+        gist = Gisture.new(TEST_GIST_ID, filename: TEST_GIST_FILENAME, strategy: :require, version: TEST_GIST_VERSION)
+        expect(gist.filename).to eql(TEST_GIST_FILENAME)
+        expect(gist.strategy).to eql(:require)
+        expect(gist.version).to eql(TEST_GIST_VERSION)
+      end
+    end
+  end
+
+  describe '.gist' do
+    it 'returns a new Gisture::Gist' do
+      expect(Gisture.gist(TEST_GIST_ID)).to be_a(Gisture::Gist)
+    end
+
+    context 'with arguments' do
+      it 'passes the arguments to the gist' do
+        gist = Gisture.gist(TEST_GIST_ID, filename: TEST_GIST_FILENAME, strategy: :require, version: TEST_GIST_VERSION)
+        expect(gist.filename).to eql(TEST_GIST_FILENAME)
+        expect(gist.strategy).to eql(:require)
+        expect(gist.version).to eql(TEST_GIST_VERSION)
+      end
+    end
+  end
+
+  # TODO should test that the file receives a call to run!
+  describe '.run' do
+    it 'creates and runs a new Gisture::Gist' do
+      expect { Gisture.run(TEST_GIST_ID) }.to_not raise_exception
+    end
+
+    context 'with arguments' do
+      it 'passes the arguments to the gist' do
+        # TODO stub Github::Client::Gists.version
+        #expect { Gisture.run(TEST_GIST_ID, filename: TEST_GIST_FILENAME, strategy: :require, version: TEST_GIST_VERSION) }.to_not raise_exception
+        expect { Gisture.run(TEST_GIST_ID, filename: TEST_GIST_FILENAME, strategy: :require) }.to_not raise_exception
+      end
+    end
+  end
+
+  describe '.repo' do
+    it 'returns a new Gisture::Repo' do
+      # TODO stub out Github::Client::Repos
+      #expect(Gisture.repo('markrebec/gisture')).to be_a(Gisture::Repo)
+    end
+  end
+
+  describe '.file' do
+    it 'returns a new Gisture::File' do
+      # TODO stub out Github::Client::Repos::Contents
+      #expect(Gisture.file('https://github.com/markrebec/gisture/blob/master/lib/gisture.rb')).to be_a(Gisture::File)
+    end
+  end
 end
