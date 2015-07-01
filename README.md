@@ -189,8 +189,6 @@ rake gisture:run[abc123,load,my_method.rb,123abc,'my_method(whatever)']
 ## TODO
 
 * Add `:exec` strategy to execute the gist file in a separate ruby process
-* Better support for gists with multiple files
-* Config option for restricting to gists belonging to whitelisted owners
 * Allow sources other than gists, like repos containing one-off scripts, generic github blobs, local files, etc.
 
 ## Contributing
