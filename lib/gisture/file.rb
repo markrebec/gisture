@@ -11,21 +11,21 @@ module Gisture
     end
 
     def require!(&block)
-      Gisture.logger.info "[gisture] Running #{basename}/#{file.filename} via the :require strategy"
+      Gisture.logger.info "[gisture] Running #{basename}/#{file.path || file.filename} via the :require strategy"
       required = require tempfile.path
       unlink_tempfile
       block_given? ? yield : required
     end
 
     def load!(&block)
-      Gisture.logger.info "[gisture] Running #{basename}/#{file.filename} via the :load strategy"
+      Gisture.logger.info "[gisture] Running #{basename}/#{file.path || file.filename} via the :load strategy"
       loaded = load tempfile.path
       unlink_tempfile
       block_given? ? yield : loaded
     end
 
     def eval!(&block)
-      Gisture.logger.info "[gisture] Running #{basename}/#{file.filename} via the :eval strategy"
+      Gisture.logger.info "[gisture] Running #{basename}/#{file.path || file.filename} via the :eval strategy"
       clean_room = Evaluator.new(file.content)
       clean_room.instance_eval &block if block_given?
       clean_room
