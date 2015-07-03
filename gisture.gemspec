@@ -8,13 +8,16 @@ Gem::Specification.new do |s|
   s.description = "Execute one-off gists inline or in the background."
   s.authors     = ["Mark Rebec"]
   s.email       = ["mark@markrebec.com"]
+  s.homepage    = "http://github.com/markrebec/gisture"
+
   s.files       = Dir["lib/**/*"]
   s.test_files  = Dir["spec/**/*"]
-  s.homepage    = "http://github.com/markrebec/gisture"
+  s.executables = "gisture"
 
   s.add_dependency "canfig"
   s.add_dependency "git"
   s.add_dependency "github_api"
+  s.add_dependency "kommand"
 
   s.add_development_dependency "rake"
   s.add_development_dependency "rspec"
