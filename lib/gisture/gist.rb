@@ -43,16 +43,64 @@ module Gisture
     end
 
     def file
-      return @file unless @file.nil?
+      @file ||= begin
+        if gist.files.count > 1 && !filename.nil?
+          raise ArgumentError, "The filename '#{filename}' was not found in the list of files for the gist '#{gist_id}'" if gist.files[filename].nil?
+          if cloned?
+            Gisture::ClonedFile.new(clone_path, filename, basename: "#{owner}/#{gist_id}", strategy: strategy)
+          else
+            Gisture::File.new(gist.files[filename], basename: "#{owner}/#{gist_id}", strategy: strategy)
+          end
+        else
+          if cloned?
+            Gisture::ClonedFile.new(clone_path, gist.files.first[1].filename, basename: "#{owner}/#{gist_id}", strategy: strategy)
+          else
+            Gisture::File.new(gist.files.first[1], basename: "#{owner}/#{gist_id}", strategy: strategy)
+          end
+        end
+      end
+    end
 
-      if gist.files.count > 1 && !filename.nil?
-        @file = Gisture::File.new(gist.files[filename], basename: "#{gist.owner.login}/#{gist_id}", strategy: strategy)
-        raise ArgumentError, "The filename '#{filename}' was not found in the list of files for the gist '#{gist_id}'" if @file.nil?
-      else
-        @file = Gisture::File.new(gist.files.first[1], basename: "#{gist.owner.login}/#{gist_id}", strategy: strategy)
+    def owner
+      gist.owner.login
+    end
+
+    def clone_path
+      @clone_path ||= ::File.join(Gisture.configuration.tmpdir, owner, gist_id)
+    end
+
+    def clone!(&block)
+      destroy_clone!
+      clone
+    end
+
+    def clone(&block)
+      return self if cloned?
+
+      Gisture.logger.info "[gisture] Cloning #{owner}/#{gist_id} into #{clone_path}"
+
+      repo_url = "https://#{Gisture.configuration.auth_str}@gist.github.com/#{gist_id}.git"
+      Git.clone(repo_url, gist_id, path: ::File.dirname(clone_path))
+
+      FileUtils.rm_rf("#{clone_path}/.git")
+      ::File.write("#{clone_path}/.gisture", Time.now.to_i.to_s)
+
+      if block_given?
+        instance_eval &block
+        destroy_clone!
       end
 
-      @file
+      self
+    end
+
+    def destroy_clone!
+      FileUtils.rm_rf(clone_path)
+    end
+
+    def cloned?
+      ::File.read("#{clone_path}/.gisture").strip
+    rescue
+      false
     end
 
     def strategy=(strat)

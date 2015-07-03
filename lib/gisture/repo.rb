@@ -61,10 +61,10 @@ module Gisture
       return self if cloned?
 
       Gisture.logger.info "[gisture] Cloning #{owner}/#{project} into #{clone_path}"
-      
+
       repo_url = "https://#{Gisture.configuration.auth_str}@github.com/#{owner}/#{project}.git"
       Git.clone(repo_url, project, path: ::File.dirname(clone_path))
-      
+
       FileUtils.rm_rf("#{clone_path}/.git")
       ::File.write("#{clone_path}/.gisture", Time.now.to_i.to_s)
 
