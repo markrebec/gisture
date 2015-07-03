@@ -26,6 +26,14 @@ module Gisture
       Dir.chdir @cwd
     end
 
+    def exec!(cmd='ruby', *args, &block)
+      @cwd = Dir.pwd
+      Dir.chdir clone_path
+      super
+    ensure
+      Dir.chdir @cwd
+    end
+
     def unlink_tempfile
       false
     end

@@ -4,7 +4,7 @@ module Gisture
   class File
     attr_reader :file, :basename, :strategy
 
-    STRATEGIES = [:eval, :load, :require]
+    STRATEGIES = [:eval, :exec, :load, :require]
 
     def run!(&block)
       send "#{strategy}!".to_sym, &block
@@ -29,6 +29,15 @@ module Gisture
       clean_room = Evaluator.new(file.content)
       clean_room.instance_eval &block if block_given?
       clean_room
+    end
+
+    def exec!(cmd='ruby', *args, &block)
+      Gisture.logger.info "[gisture] Running #{basename}/#{file.path || file.filename} via the :exec strategy"
+      args.map! { |arg| arg.nil? ? tempfile.path : arg }
+      args = args.unshift(cmd)
+      args << tempfile.path unless args.include?(tempfile.path)
+      executed = `#{args.join(' ')}`.strip
+      block_given? ? yield : executed
     end
 
     def strategy=(strat)
