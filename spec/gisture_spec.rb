@@ -1,6 +1,32 @@
 require "spec_helper"
 
 RSpec.describe Gisture do
+  describe '.logger' do
+    context 'when no logger is configured' do
+      it 'returns an instance of the base logger class' do
+        expect(Gisture.logger).to be_an_instance_of(Logger)
+      end
+    end
+
+    context 'when a logger is configured' do
+      it 'returns the configured logger' do
+        begin
+          Gisture.configure do |config|
+            config.logger = Logger.new(STDERR)
+          end
+
+          expect(Gisture.logger).to eql(Gisture.configuration.logger)
+        rescue => e
+          raise e
+        ensure
+          Gisture.configure do |config|
+            config.logger = nil
+          end
+        end
+      end
+    end
+  end
+
   describe '.new' do
     it 'returns a new Gisture::Gist' do
       expect(Gisture.new(TEST_GIST_ID)).to be_a(Gisture::Gist)
