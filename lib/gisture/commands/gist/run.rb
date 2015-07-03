@@ -11,6 +11,7 @@ module Gisture
         valid_argument Kommand::Scripts::Argument.new("-f, --filename", summary: "Specify a filename if your gist has multiple files")
         valid_argument Kommand::Scripts::Argument.new("-s, --strategy", summary: "Execution strategy, defaults to 'eval'")
         valid_argument Kommand::Scripts::Argument.new("-e, --evaluator", summary: "Use a custom evaluator class, only applies to 'eval' strategy")
+        valid_argument Kommand::Scripts::Argument.new("-c, --clone", summary: "Clone the gist into a local tmp path and run from that working dir")
         validate_arguments false
 
         class << self
@@ -25,7 +26,8 @@ module Gisture
         end
 
         def run
-          result = Gisture.run(gist_url, strategy: strategy, filename: filename)
+          gist.clone! if clone?
+          result = gist.run!
           if strategy == :exec
             puts result
           else
@@ -34,6 +36,10 @@ module Gisture
         end
 
         protected
+
+        def gist
+          @gist = Gisture.gist(gist_url, strategy: strategy, filename: filename)
+        end
 
         def gist_url
           @gist_url ||= arguments.first.key
@@ -76,6 +82,10 @@ module Gisture
               fname.value
             end
           end
+        end
+
+        def clone?
+          !arguments.select { |a| a.name == 'clone' }.first.nil?
         end
 
       end
