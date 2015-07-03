@@ -5,6 +5,8 @@ require 'gisture/version'
 require 'gisture/errors'
 require 'gisture/evaluator'
 require 'gisture/file'
+require 'gisture/cloned_file'
+require 'gisture/repo_file'
 require 'gisture/gist'
 require 'gisture/repo'
 require 'gisture/railtie' if defined?(Rails)

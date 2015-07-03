@@ -38,14 +38,51 @@ module Gisture
     end
 
     def file(path, strategy: nil)
-      file = github.repos.contents.get(user: owner, repo: project, path: path).body
-      file['filename'] = ::File.basename(file['path'])
-      file['content'] = Base64.decode64(file['content'])
-      Gisture::File.new(file, basename: "#{owner}/#{project}", strategy: strategy)
+      if cloned?
+        file = ::File.join(clone_path, path)
+        Gisture::ClonedFile.new(file, basename: "#{owner}/#{project}", strategy: strategy)
+      else
+        file = github.repos.contents.get(user: owner, repo: project, path: path).body
+        Gisture::RepoFile.new(file, basename: "#{owner}/#{project}", strategy: strategy)
+      end
     end
 
     def run!(path, strategy: nil, &block)
       file(path, strategy: strategy).run!(&block)
+    end
+
+    def clone_path
+      @clone_path ||= ::File.join(Gisture.configuration.tmpdir, owner, project)
+    end
+
+    def clone!(&block)
+      # TODO support basic auth here as well
+      auth_str = "#{Gisture.configuration.oauth_token}:x-oauth-basic"
+      clone_cmd = "git clone https://#{auth_str}@github.com/#{owner}/#{project}.git #{clone_path}"
+
+      Gisture.logger.info "[gisture] Cloning #{owner}/#{project} into #{clone_path}"
+
+      destroy_clone!
+      `#{clone_cmd}`
+      FileUtils.rm_rf("#{clone_path}/.git")
+      ::File.write("#{clone_path}/.gisture", Time.now.to_i.to_s)
+
+      if block_given?
+        instance_eval &block
+        destroy_clone!
+      end
+
+      self
+    end
+
+    def destroy_clone!
+      FileUtils.rm_rf(clone_path)
+    end
+
+    def cloned?
+      ::File.read("#{clone_path}/.gisture").strip
+    rescue
+      false
     end
 
     protected
