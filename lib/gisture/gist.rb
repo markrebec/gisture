@@ -42,21 +42,21 @@ module Gisture
       end
     end
 
-    def file
-      @file ||= begin
-        if gist.files.count > 1 && !filename.nil?
-          raise ArgumentError, "The filename '#{filename}' was not found in the list of files for the gist '#{gist_id}'" if gist.files[filename].nil?
-          if cloned?
-            Gisture::ClonedFile.new(clone_path, filename, basename: "#{owner}/#{gist_id}", strategy: strategy)
-          else
-            Gisture::File.new(gist.files[filename], basename: "#{owner}/#{gist_id}", strategy: strategy)
-          end
+    def file(fname=nil)
+      fname ||= filename
+
+      if gist.files.count > 1 && !fname.nil?
+        raise ArgumentError, "The filename '#{fname}' was not found in the list of files for the gist '#{gist_id}'" if gist.files[fname].nil?
+        if cloned?
+          Gisture::ClonedFile.new(clone_path, fname, basename: "#{owner}/#{gist_id}", strategy: strategy)
         else
-          if cloned?
-            Gisture::ClonedFile.new(clone_path, gist.files.first[1].filename, basename: "#{owner}/#{gist_id}", strategy: strategy)
-          else
-            Gisture::File.new(gist.files.first[1], basename: "#{owner}/#{gist_id}", strategy: strategy)
-          end
+          Gisture::File.new(gist.files[fname], basename: "#{owner}/#{gist_id}", strategy: strategy)
+        end
+      else
+        if cloned?
+          Gisture::ClonedFile.new(clone_path, gist.files.first[1].filename, basename: "#{owner}/#{gist_id}", strategy: strategy)
+        else
+          Gisture::File.new(gist.files.first[1], basename: "#{owner}/#{gist_id}", strategy: strategy)
         end
       end
     end
