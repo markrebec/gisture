@@ -2,7 +2,6 @@ module Gisture
   class Gist
     attr_reader :filename, :gist_id, :strategy, :version
 
-    STRATEGIES = [:eval, :load, :require]
     GIST_URL_REGEX = /\Ahttp.+([0-9a-f]{20,20})\/?\Z/
     GIST_URL_WITH_VERSION_REGEX = /\Ahttp.+([0-9a-f]{20,20})\/([0-9a-f]{40,40})\/?\Z/
 
@@ -10,20 +9,24 @@ module Gisture
       new(gist, strategy: strategy, filename: filename, version: version).run!(&block)
     end
 
-    def run!(&block)
-      send "#{strategy}!".to_sym, &block
+    def run!(*args, &block)
+      file.run! *args, &block
     end
 
-    def require!(&block)
-      file.require! &block
+    def require!(*args, &block)
+      file.require! *args, &block
     end
 
-    def load!(&block)
-      file.load! &block
+    def load!(*args, &block)
+      file.load! *args, &block
     end
 
-    def eval!(&block)
-      file.eval! &block
+    def eval!(*args, &block)
+      file.eval! *args, &block
+    end
+
+    def exec!(*args, &block)
+      file.exec! *args, &block
     end
 
     def github
@@ -44,20 +47,13 @@ module Gisture
 
     def file(fname=nil)
       fname ||= filename
+      fname ||= gist.files.first[1].filename
+      raise ArgumentError, "The filename '#{fname}' was not found in the list of files for the gist '#{gist_id}'" if gist.files[fname].nil?
 
-      if gist.files.count > 1 && !fname.nil?
-        raise ArgumentError, "The filename '#{fname}' was not found in the list of files for the gist '#{gist_id}'" if gist.files[fname].nil?
-        if cloned?
-          Gisture::ClonedFile.new(clone_path, fname, basename: "#{owner}/#{gist_id}", strategy: strategy)
-        else
-          Gisture::File.new(gist.files[fname], basename: "#{owner}/#{gist_id}", strategy: strategy)
-        end
+      if cloned?
+        Gisture::ClonedFile.new(clone_path, fname, basename: "#{owner}/#{gist_id}", strategy: strategy)
       else
-        if cloned?
-          Gisture::ClonedFile.new(clone_path, gist.files.first[1].filename, basename: "#{owner}/#{gist_id}", strategy: strategy)
-        else
-          Gisture::File.new(gist.files.first[1], basename: "#{owner}/#{gist_id}", strategy: strategy)
-        end
+        Gisture::File.new(gist.files[fname], basename: "#{owner}/#{gist_id}", strategy: strategy)
       end
     end
 
@@ -104,8 +100,10 @@ module Gisture
     end
 
     def strategy=(strat)
-      raise ArgumentError, "Invalid strategy '#{strat}'. Must be one of #{STRATEGIES.join(', ')}" unless STRATEGIES.include?(strat.to_sym)
-      @strategy = strat.to_sym
+      strat_key = strat
+      strat_key = strat.keys.first if strat.respond_to?(:keys)
+      raise ArgumentError, "Invalid strategy '#{strat_key}'. Must be one of #{File::STRATEGIES.join(', ')}" unless File::STRATEGIES.include?(strat_key.to_sym)
+      @strategy = strat
     end
 
     def to_h

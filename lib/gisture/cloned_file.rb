@@ -2,7 +2,7 @@ module Gisture
   class ClonedFile < File
     attr_reader :clone_path
 
-    def require!(&block)
+    def require!(*args, &block)
       @cwd = Dir.pwd
       Dir.chdir clone_path
       super
@@ -10,7 +10,7 @@ module Gisture
       Dir.chdir @cwd
     end
 
-    def load!(&block)
+    def load!(*args, &block)
       @cwd = Dir.pwd
       Dir.chdir clone_path
       super
@@ -18,7 +18,7 @@ module Gisture
       Dir.chdir @cwd
     end
 
-    def eval!(&block)
+    def eval!(*args, &block)
       @cwd = Dir.pwd
       Dir.chdir clone_path
       super
@@ -26,7 +26,7 @@ module Gisture
       Dir.chdir @cwd
     end
 
-    def exec!(cmd='ruby', *args, &block)
+    def exec!(*args, &block)
       @cwd = Dir.pwd
       Dir.chdir clone_path
       super
