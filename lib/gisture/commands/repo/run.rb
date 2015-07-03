@@ -8,10 +8,10 @@ module Gisture
 
         command_name 'repo:run'
         command_summary "Run a repo file directly from the command line"
-        valid_argument Kommand::Scripts::Argument.new("-f, --filename", summary: "Specify a filename if your gist has multiple files")
+        valid_argument Kommand::Scripts::Argument.new("-f, --filename", summary: "Specify a filename if it's not included in the repo URL")
         valid_argument Kommand::Scripts::Argument.new("-s, --strategy", summary: "Execution strategy, defaults to 'eval'")
         valid_argument Kommand::Scripts::Argument.new("-e, --evaluator", summary: "Use a custom evaluator class, only applies to 'eval' strategy")
-        valid_argument Kommand::Scripts::Argument.new("-c, --clone", summary: "Clone the gist into a local tmp path and run from that working dir")
+        valid_argument Kommand::Scripts::Argument.new("-c, --clone", summary: "Clone the repo into a local tmp path and run from that working dir")
         validate_arguments false
 
         class << self
