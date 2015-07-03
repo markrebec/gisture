@@ -41,7 +41,7 @@ module Gisture
       file = github.repos.contents.get(user: owner, repo: project, path: path).body
       file['filename'] = ::File.basename(file['path'])
       file['content'] = Base64.decode64(file['content'])
-      Gisture::File.new(file, basename: "#{owner}-#{project}", strategy: strategy)
+      Gisture::File.new(file, basename: "#{owner}/#{project}", strategy: strategy)
     end
 
     def run!(path, strategy: nil, &block)

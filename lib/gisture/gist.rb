@@ -49,10 +49,10 @@ module Gisture
       return @file unless @file.nil?
 
       if gist.files.count > 1 && !filename.nil?
-        @file = Gisture::File.new(gist.files[filename], basename: gist_id, strategy: strategy)
+        @file = Gisture::File.new(gist.files[filename], basename: "#{gist.owner.login}/#{gist_id}", strategy: strategy)
         raise ArgumentError, "The filename '#{filename}' was not found in the list of files for the gist '#{gist_id}'" if @file.nil?
       else
-        @file = Gisture::File.new(gist.files.first[1], basename: gist_id, strategy: strategy)
+        @file = Gisture::File.new(gist.files.first[1], basename: "#{gist.owner.login}/#{gist_id}", strategy: strategy)
       end
 
       @file

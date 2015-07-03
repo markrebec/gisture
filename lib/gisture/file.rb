@@ -11,18 +11,21 @@ module Gisture
     end
 
     def require!(&block)
+      Gisture.logger.info "[gisture] Running #{basename}/#{file.filename} via the :require strategy"
       required = require tempfile.path
       unlink_tempfile
       block_given? ? yield : required
     end
 
     def load!(&block)
+      Gisture.logger.info "[gisture] Running #{basename}/#{file.filename} via the :load strategy"
       loaded = load tempfile.path
       unlink_tempfile
       block_given? ? yield : loaded
     end
 
     def eval!(&block)
+      Gisture.logger.info "[gisture] Running #{basename}/#{file.filename} via the :eval strategy"
       clean_room = Evaluator.new(file.content)
       clean_room.instance_eval &block if block_given?
       clean_room
@@ -35,7 +38,7 @@ module Gisture
 
     def tempfile
       @tempfile ||= begin
-        tmpfile = Tempfile.new([basename, file.filename, ::File.extname(file.filename)].compact, Gisture.configuration.tmpdir)
+        tmpfile = Tempfile.new([basename.to_s.gsub(/\//, '-'), file.filename, ::File.extname(file.filename)].compact, Gisture.configuration.tmpdir)
         tmpfile.write(file.content)
         tmpfile.close
         tmpfile
