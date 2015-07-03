@@ -30,7 +30,7 @@ module Gisture
     end
 
     def github
-      @github ||= Github.new(Gisture.configuration.github_api)
+      @github ||= Github.new(Gisture.configuration.github.to_h)
     end
 
     def gist
@@ -75,7 +75,7 @@ module Gisture
 
       Gisture.logger.info "[gisture] Cloning #{owner}/#{gist_id} into #{clone_path}"
 
-      repo_url = "https://#{Gisture.configuration.auth_str}@gist.github.com/#{gist_id}.git"
+      repo_url = "https://#{Gisture.configuration.github.auth_str}@gist.github.com/#{gist_id}.git"
       Git.clone(repo_url, gist_id, path: ::File.dirname(clone_path))
 
       FileUtils.rm_rf("#{clone_path}/.git")

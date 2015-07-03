@@ -45,12 +45,12 @@ Gisture uses the [github_api](http://peter-murach.github.io/github/) gem to load
 ```ruby
 Gisture.configure do |config|
   # config options for the github_api gem
-  config.basic_auth     = nil # user:password string
-  config.oauth_token    = nil # oauth authorization token
-  config.client_id      = nil # oauth client id
-  config.client_secret  = nil # oauth client secret
-  config.user           = nil # global user used in requets if none provided
-  config.org            = nil # global organization used in request if none provided
+  config.github.basic_auth     = nil  # user:password string
+  config.github.oauth_token    = nil  # oauth authorization token
+  config.github.client_id      = nil  # oauth client id
+  config.github.client_secret  = nil  # oauth client secret
+  config.github.user           = nil  # global user used in requets if none provided
+  config.github.org            = nil  # global organization used in request if none provided
 
   config.logger         = nil         # defaults to STDOUT but will use Rails.logger in a rails environment
   config.strategy       = :eval       # default execution strategy

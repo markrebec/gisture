@@ -6,7 +6,7 @@ Coveralls.wear!
 Dir[File.join(File.dirname(__FILE__), '..', "spec/support/**/*.rb")].each { |f| require f }
 
 Gisture.configure do |config|
-  config.oauth_token = ENV['GITHUB_OAUTH_TOKEN']
+  config.github.oauth_token = ENV['GITHUB_OAUTH_TOKEN']
 end
 
 TEST_GIST_ID = "520b474ea0248d1a0a74"
