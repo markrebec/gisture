@@ -52,6 +52,7 @@ Gisture.configure do |config|
   config.user           = nil # global user used in requets if none provided
   config.org            = nil # global organization used in request if none provided
 
+  config.logger         = nil         # defaults to STDOUT but will use Rails.logger in a rails environment
   config.strategy       = :eval       # default execution strategy
   config.tmpdir         = Dir.tmpdir  # location to store gist tempfiles when using the require or load strategies
   config.owners         = nil         # only allow gists/repos/etc. from whitelisted owners (str/sym/arr)
