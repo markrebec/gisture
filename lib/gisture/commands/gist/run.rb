@@ -26,8 +26,10 @@ module Gisture
         end
 
         def run
-          gist.clone! if clone?
+          clone? ? gist.clone! : gist.destroy_clone!
+
           result = gist.run!
+
           if strategy == :exec
             puts result
           else
@@ -42,18 +44,12 @@ module Gisture
         end
 
         def gist_url
-          @gist_url ||= arguments.first.key
+          @gist_url ||= arguments.unnamed.first.value
         end
 
         def strategy
           @strategy ||= begin
-            strat = arguments.select { |a| a.name == 'strategy' }.first
-            if strat.nil?
-              strat = 'eval'
-            else
-              strat = strat.value
-            end
-            
+            strat = arguments.get(:strategy) || 'eval'
             if strat == 'eval'
               {eval: evaluator}
             else
@@ -63,29 +59,15 @@ module Gisture
         end
 
         def evaluator
-          @evaluator ||= begin
-            evlr = arguments.select { |a| a.name == 'evaluator' }.first
-            if evlr.nil?
-              Gisture::Evaluator
-            else
-              eval(evlr.value)
-            end
-          end
+          @evaluator ||= eval(arguments.get(:evaluator) || 'Gisture::Evaluator')
         end
 
         def filename
-          @filename ||= begin
-            fname = arguments.select { |a| a.name == 'filename' }.first
-            if fname.nil?
-              fname # nil
-            else
-              fname.value
-            end
-          end
+          @filename ||= arguments.get(:filename)
         end
 
         def clone?
-          !arguments.select { |a| a.name == 'clone' }.first.nil?
+          arguments.arg?(:clone)
         end
 
       end
