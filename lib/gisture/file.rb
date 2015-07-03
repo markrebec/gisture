@@ -36,9 +36,11 @@ module Gisture
 
     def eval!(*args, &block)
       Gisture.logger.info "[gisture] Running #{basename}/#{file.path || file.filename} via the :eval strategy"
-      clean_room = Evaluator.new(file.content)
-      clean_room.instance_eval &block if block_given?
-      clean_room
+      args << Gisture::Evaluator
+      klass = args.first
+      evaluator = klass.new(file.content)
+      evaluator.instance_eval &block if block_given?
+      evaluator
     end
 
     def exec!(*args, &block)
