@@ -1,4 +1,5 @@
 require 'canfig'
+require 'git'
 require 'github_api'
 require 'gisture/github_api/client/gists'
 require 'gisture/version'
@@ -32,6 +33,15 @@ module Gisture
 
     def whitelisted?(owner)
       owners.nil? || owners.empty? || [owners].flatten.map(&:to_s).include?(owner)
+    end
+
+    def github_api
+      Hash[Gisture::GITHUB_CONFIG_OPTS.map { |key| [key, send(key)] }]
+    end
+
+    def auth_str
+      return "#{oauth_token}:x-oauth-basic" if oauth_token
+      return basic_auth if basic_auth
     end
   end
 

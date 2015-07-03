@@ -28,9 +28,7 @@ module Gisture
     end
 
     def github
-      @github ||= begin
-        Github.new(github_config)
-      end
+      @github ||= Github.new(Gisture.configuration.github_api)
     end
 
     def repo
@@ -55,14 +53,18 @@ module Gisture
     end
 
     def clone!(&block)
-      # TODO support basic auth here as well
-      auth_str = "#{Gisture.configuration.oauth_token}:x-oauth-basic"
-      clone_cmd = "git clone https://#{auth_str}@github.com/#{owner}/#{project}.git #{clone_path}"
+      destroy_clone!
+      clone
+    end
+
+    def clone(&block)
+      return self if cloned?
 
       Gisture.logger.info "[gisture] Cloning #{owner}/#{project} into #{clone_path}"
-
-      destroy_clone!
-      `#{clone_cmd}`
+      
+      repo_url = "https://#{Gisture.configuration.auth_str}@github.com/#{owner}/#{project}.git"
+      Git.clone(repo_url, project, path: ::File.dirname(clone_path))
+      
       FileUtils.rm_rf("#{clone_path}/.git")
       ::File.write("#{clone_path}/.gisture", Time.now.to_i.to_s)
 
@@ -89,10 +91,6 @@ module Gisture
     def initialize(repo)
       @owner, @project = self.class.parse_repo_url(repo)
       raise OwnerBlacklisted.new(owner) unless Gisture.configuration.whitelisted?(owner)
-    end
-
-    def github_config
-      github_config = Hash[Gisture::GITHUB_CONFIG_OPTS.map { |key| [key, Gisture.configuration.send(key)] }]
     end
   end
 end

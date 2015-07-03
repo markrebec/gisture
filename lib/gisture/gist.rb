@@ -27,10 +27,7 @@ module Gisture
     end
 
     def github
-      @github ||= begin
-        github_config = Hash[Gisture::GITHUB_CONFIG_OPTS.map { |key| [key, Gisture.configuration.send(key)] }]
-        Github.new(github_config)
-      end
+      @github ||= Github.new(Gisture.configuration.github_api)
     end
 
     def gist

@@ -13,6 +13,7 @@ Gem::Specification.new do |s|
   s.homepage    = "http://github.com/markrebec/gisture"
 
   s.add_dependency "canfig"
+  s.add_dependency "git"
   s.add_dependency "github_api"
 
   s.add_development_dependency "rake"
