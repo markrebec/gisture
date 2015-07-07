@@ -1,4 +1,5 @@
 path: /spec/gists/simple.rb
 strategy: eval
 evaluator: "Gisture::Evaluator"
+executor: ['ruby', '-v']
 clone: true

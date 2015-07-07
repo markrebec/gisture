@@ -44,8 +44,26 @@ module Gisture
       end
     end
 
-    def run!(path, strategy: nil, &block)
-      file(path, strategy: strategy).run!(&block)
+    def run!(path, &block)
+      yaml_gist = YAML.load(file(path).content).symbolize_keys
+      # path: path/to/file.rb
+      # strategy: eval
+      # evaluator: MyEvalClass
+      # executor: ['ruby', '-v']
+      # clone: true
+      # resources:
+      #   - path: path/to/resource.csv
+      #   - path: path/to/image.jpg
+      # dependencies:
+      #   - gist: path/to/other.gist
+
+      clone! if yaml_gist[:clone] == true
+
+      run_options = []
+      run_options << eval(yaml_gist[:evaluator]) if yaml_gist[:strategy].to_sym == :eval && yaml_gist[:evaluator].present?
+      run_options = yaml_gist[:executor] if yaml_gist[:strategy].to_sym == :exec && yaml_gist[:executor].present?
+
+      file(yaml_gist[:path], strategy: yaml_gist[:strategy]).run!(*run_options, &block)
     end
 
     def clone_path
