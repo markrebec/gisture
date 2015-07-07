@@ -60,8 +60,8 @@ module Gisture
       clone! if yaml_gist[:clone] == true
 
       run_options = []
-      run_options << eval(yaml_gist[:evaluator]) if yaml_gist[:strategy].to_sym == :eval && yaml_gist[:evaluator].present?
-      run_options = yaml_gist[:executor] if yaml_gist[:strategy].to_sym == :exec && yaml_gist[:executor].present?
+      run_options << eval(yaml_gist[:evaluator]) if yaml_gist[:strategy].to_sym == :eval && yaml_gist.key?(:evaluator)
+      run_options = yaml_gist[:executor] if yaml_gist[:strategy].to_sym == :exec && yaml_gist.key?(:executor)
 
       file(yaml_gist[:path], strategy: yaml_gist[:strategy]).run!(*run_options, &block)
     end
