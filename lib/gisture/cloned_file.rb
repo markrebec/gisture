@@ -44,7 +44,7 @@ module Gisture
       path = ::File.join(clone_path, file_path)
       @clone_path = clone_path
       @tempfile = ::File.new(path)
-      file_hash = Hashie::Mash.new({path: path, filename: ::File.basename(path), content: tempfile.read})
+      file_hash = Hashie::Mash.new({path: path, filename: file_path, content: tempfile.read})
       super(file_hash, basename: basename, strategy: strategy)
     end
   end
