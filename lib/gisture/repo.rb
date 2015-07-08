@@ -3,6 +3,7 @@ module Gisture
     attr_reader :owner, :project
     REPO_URL_REGEX = /\A((http[s]?:\/\/)?github\.com\/)?([a-z0-9_\-\.]*)\/([a-z0-9_\-\.]*)\/?\Z/i
     FILE_URL_REGEX = /\A((http[s]?:\/\/)?github\.com\/)?(([a-z0-9_\-\.]*)\/([a-z0-9_\-\.]*))(\/[a-z0-9_\-\.\/]+)\Z/i
+    GISTURE_FILE_REGEX = /\A(gisture\.ya?ml|.+\.gist|.+\.gisture)\Z/ # gisture.yml, gisture.yaml, whatever.gist, whatever.gisture
 
     class << self
       def file(path, strategy: nil)
@@ -44,17 +45,40 @@ module Gisture
       end
     end
 
-    def run!(path, &block)
-      yaml_gist = YAML.load(file(path).content).symbolize_keys
+    def files(path)
+      if cloned?
+        Dir[::File.join(clone_path, path, '*')].map { |f| Hashie::Mash.new({name: ::File.basename(f), path: ::File.join(path, ::File.basename(f))}) }
+      else
+        github.repos.contents.get(user: owner, repo: project, path: path).body
+      end
+    end
 
-      clone! if yaml_gist[:clone] == true
+    def gistures(path)
+      if ::File.basename(path).match(GISTURE_FILE_REGEX)
+        [Hashie::Mash.new(YAML.load(file(path).content).symbolize_keys)]
+      else
+        files(path).select { |f| f.name.match(GISTURE_FILE_REGEX) }.map { |f| Hashie::Mash.new(YAML.load(file(f.path).content).symbolize_keys) }
+      end
+    end
+
+    def gisticulate(gisture, &block)
+      # TODO check if multiple gists defined by checking for required keys (:path, ?)
+
+      clone if gisture[:clone] == true
 
       run_options = []
-      run_options << eval(yaml_gist[:evaluator]) if yaml_gist[:strategy].to_sym == :eval && yaml_gist.key?(:evaluator)
-      run_options = yaml_gist[:executor] if yaml_gist[:strategy].to_sym == :exec && yaml_gist.key?(:executor)
+      run_options << eval(gisture[:evaluator]) if gisture[:strategy].to_sym == :eval && gisture.key?(:evaluator)
+      run_options = gisture[:executor] if gisture[:strategy].to_sym == :exec && gisture.key?(:executor)
 
-      file(yaml_gist[:path], strategy: yaml_gist[:strategy]).run!(*run_options, &block)
+      file(gisture[:path], strategy: gisture[:strategy]).run!(*run_options, &block)
     end
+
+    def run(path, &block)
+      gists = gistures(path)
+      clone! if gists.any? { |g| g[:clone] == true } # force clone once up front for a refresh
+      gists.each { |g| gisticulate(g, &block) }
+    end
+    alias_method :run!, :run
 
     def clone_path
       @clone_path ||= ::File.join(Gisture.configuration.tmpdir, owner, project)
