@@ -79,18 +79,21 @@ module Gisture
         if gisture[:resources] && !cloned?
           # localize and pull down any relevant resources
           gisture[:resources].each do |resource|
+            Gisture.logger.info "[gisture] Localizing resource #{::File.join(owner, project, resource)} into #{clone_path}"
             file(resource).localize!(clone_path)
           end
 
           # localize the file we're running
+          Gisture.logger.info "[gisture] Localizing gisture #{::File.join(owner, project, gisture[:path])} into #{clone_path}"
           gfile = file(gisture[:path], strategy: gisture[:strategy])
           gfile.localize!(clone_path)
 
           # chdir into the localized temp path
           cwd = Dir.pwd
           Dir.chdir ::File.dirname(gfile.tempfile.path)
-          gfile.run!(*run_options, &block)
+          result = gfile.run!(*run_options, &block)
           Dir.chdir cwd
+          result
         else
           file(gisture[:path], strategy: gisture[:strategy]).run!(*run_options, &block)
         end
