@@ -1,4 +1,4 @@
 path: /spec/gists/class.rb
-strategy: eval
+strategy: require
 evaluator: "Gisture::Evaluator"
 clone: true
