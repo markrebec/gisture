@@ -53,6 +53,8 @@ module Gisture
       end
     end
 
+    # TODO move all the gisture/gisticulate stuff into a separate class (Gisture? Gisticulation?)
+
     def gistures(path)
       if ::File.basename(path).match(GISTURE_FILE_REGEX)
         [Hashie::Mash.new(YAML.load(file(path).content).symbolize_keys)]
@@ -71,10 +73,27 @@ module Gisture
         clone if gisture[:clone] == true
 
         run_options = []
-        run_options << eval(gisture[:evaluator]) if gisture[:strategy].to_sym == :eval && gisture.key?(:evaluator)
-        run_options = gisture[:executor] if gisture[:strategy].to_sym == :exec && gisture.key?(:executor)
+        run_options << eval(gisture[:evaluator]) if (!gisture.key?(:strategy) || gisture[:strategy].to_sym == :eval) && gisture.key?(:evaluator)
+        run_options = gisture[:executor] if (gisture.key?(:strategy) && gisture[:strategy].to_sym == :exec) && gisture.key?(:executor)
 
-        file(gisture[:path], strategy: gisture[:strategy]).run!(*run_options, &block)
+        if gisture[:resources] && !cloned?
+          # localize and pull down any relevant resources
+          gisture[:resources].each do |resource|
+            file(resource).localize!(clone_path)
+          end
+
+          # localize the file we're running
+          gfile = file(gisture[:path], strategy: gisture[:strategy])
+          gfile.localize!(clone_path)
+
+          # chdir into the localized temp path
+          cwd = Dir.pwd
+          Dir.chdir ::File.dirname(gfile.tempfile.path)
+          gfile.run!(*run_options, &block)
+          Dir.chdir cwd
+        else
+          file(gisture[:path], strategy: gisture[:strategy]).run!(*run_options, &block)
+        end
       end
     end
 
