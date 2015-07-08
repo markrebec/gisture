@@ -21,21 +21,21 @@ module Gisture
     end
 
     def require!(*args, &block)
-      Gisture.logger.info "[gisture] Running #{basename}/#{file.path || file.filename} via the :require strategy"
+      Gisture.logger.info "[gisture] Running #{::File.join(basename, (file.filename || file.path))} via the :require strategy"
       required = require tempfile.path
       unlink_tempfile
       block_given? ? yield : required
     end
 
     def load!(*args, &block)
-      Gisture.logger.info "[gisture] Running #{basename}/#{file.path || file.filename} via the :load strategy"
+      Gisture.logger.info "[gisture] Running #{::File.join(basename, (file.filename || file.path))} via the :load strategy"
       loaded = load tempfile.path
       unlink_tempfile
       block_given? ? yield : loaded
     end
 
     def eval!(*args, &block)
-      Gisture.logger.info "[gisture] Running #{basename}/#{file.path || file.filename} via the :eval strategy"
+      Gisture.logger.info "[gisture] Running #{::File.join(basename, (file.filename || file.path))} via the :eval strategy"
       args << Gisture::Evaluator
       klass = args.first
       evaluator = klass.new(file.content)
@@ -44,7 +44,7 @@ module Gisture
     end
 
     def exec!(*args, &block)
-      Gisture.logger.info "[gisture] Running #{basename}/#{file.path || file.filename} via the :exec strategy"
+      Gisture.logger.info "[gisture] Running #{::File.join(basename, (file.filename || file.path))} via the :exec strategy"
 
       # map nils to file path in args to allow easily inserting the filepath wherever
       # makes sense in your executable arguments (i.e. 'ruby', '-v', nil, '--script-arg')
