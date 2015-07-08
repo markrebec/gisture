@@ -1,0 +1,4 @@
+path: spec/gists/simple.rb
+resources:
+  - spec/gists/method.rb
+  - lib/gisture/version.rb
