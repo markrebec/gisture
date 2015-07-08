@@ -1,4 +1,4 @@
-path: spec/gists/simple.rb
+path: spec/gists/resourceful.rb
 resources:
-  - spec/gists/method.rb
+  - spec/gists/resourceful.txt
   - lib/gisture/version.rb
