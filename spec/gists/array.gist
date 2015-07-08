@@ -1,4 +1,4 @@
-gistures:
+gists:
   - path: spec/gists/simple.rb
     strategy: eval
   - path: spec/gists/method.rb
