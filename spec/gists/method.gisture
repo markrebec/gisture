@@ -1,0 +1,3 @@
+path: /spec/gists/method.rb
+strategy: eval
+clone: false
