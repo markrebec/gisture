@@ -81,6 +81,17 @@ module Gisture
       end
     end
 
+    def localize!(root)
+      @tempfile = begin
+        fname = ::File.join(root, (file.path || file.filename))
+        FileUtils.mkdir_p ::File.dirname(fname)
+        local_file = ::File.open(fname, 'w')
+        local_file.write(file.content)
+        local_file.close
+        local_file
+      end
+    end
+
     def extname
       @extname ||= ::File.extname(file.filename)
     end
