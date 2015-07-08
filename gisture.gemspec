@@ -15,6 +15,7 @@ Gem::Specification.new do |s|
   s.executables = "gisture"
 
   s.add_dependency "canfig"
+  s.add_dependency "hashie"
   s.add_dependency "git"
   s.add_dependency "github_api"
   s.add_dependency "kommand", ">= 0.0.4"
