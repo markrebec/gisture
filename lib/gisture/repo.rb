@@ -46,16 +46,6 @@ module Gisture
 
     def run!(path, &block)
       yaml_gist = YAML.load(file(path).content).symbolize_keys
-      # path: path/to/file.rb
-      # strategy: eval
-      # evaluator: MyEvalClass
-      # executor: ['ruby', '-v']
-      # clone: true
-      # resources:
-      #   - path: path/to/resource.csv
-      #   - path: path/to/image.jpg
-      # dependencies:
-      #   - gist: path/to/other.gist
 
       clone! if yaml_gist[:clone] == true
 
