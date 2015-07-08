@@ -90,7 +90,7 @@ module Gisture
 
           # chdir into the localized temp path
           cwd = Dir.pwd
-          Dir.chdir ::File.dirname(gfile.tempfile.path)
+          Dir.chdir clone_path
           result = gfile.run!(*run_options, &block)
           Dir.chdir cwd
           result
