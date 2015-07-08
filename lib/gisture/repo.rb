@@ -62,21 +62,26 @@ module Gisture
     end
 
     def gisticulate(gisture, &block)
-      # TODO check if multiple gists defined by checking for required keys (:path, ?)
+      if gisture.key?(:gistures) || gisture.key?(:gists)
+        gists = (gisture[:gistures] || gisture[:gists])
+        gists = gists.values if gists.respond_to?(:values)
+        clone! if gists.any? { |g| g[:clone] == true } # force clone once up front for a refresh
+        gists.map { |gist| gisticulate(gist, &block) }
+      else
+        clone if gisture[:clone] == true
 
-      clone if gisture[:clone] == true
+        run_options = []
+        run_options << eval(gisture[:evaluator]) if gisture[:strategy].to_sym == :eval && gisture.key?(:evaluator)
+        run_options = gisture[:executor] if gisture[:strategy].to_sym == :exec && gisture.key?(:executor)
 
-      run_options = []
-      run_options << eval(gisture[:evaluator]) if gisture[:strategy].to_sym == :eval && gisture.key?(:evaluator)
-      run_options = gisture[:executor] if gisture[:strategy].to_sym == :exec && gisture.key?(:executor)
-
-      file(gisture[:path], strategy: gisture[:strategy]).run!(*run_options, &block)
+        file(gisture[:path], strategy: gisture[:strategy]).run!(*run_options, &block)
+      end
     end
 
     def run(path, &block)
       gists = gistures(path)
       clone! if gists.any? { |g| g[:clone] == true } # force clone once up front for a refresh
-      gists.each { |g| gisticulate(g, &block) }
+      gists.map { |g| gisticulate(g, &block) }
     end
     alias_method :run!, :run
 
