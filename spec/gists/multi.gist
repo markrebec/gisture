@@ -1,0 +1,10 @@
+gistures:
+  simple:
+    path: spec/gists/simple.rb
+    strategy: eval
+  method:
+    path: spec/gists/method.rb
+    strategy: load
+  class:
+    path: spec/gists/class.rb
+    strategy: require
