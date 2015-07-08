@@ -25,7 +25,7 @@ Don't uses gists, but have a public or private github repo where you store snipp
 
 ```ruby
 Gisture.file('markrebec/gisture/lib/gisture/version.rb').run!
-Gisture.repo('markrebec/gisture').run!('lib/gisture/version.rb')
+Gisture.repo('markrebec/gisture').file('lib/gisture/version.rb').run!
 ```
 
 **Note:** I'm still fleshing out what the final version of the API will look like. I'll be making every effort to keep things backwards compatible while working towards a 1.0 release, but you should expect some things to change.
@@ -92,8 +92,9 @@ Gisture doesn't only run gists. It also allows you to one-off include/execute an
 ```ruby
 file = Gisture.file('markrebec/gisture/lib/gisture/version.rb')
 file.run!
+repo = Gisture::Repo.new('markrebec/gisture')
+repo.file('lib/gisture/version.rb').run!
 Gisture.repo('markrebec/gisture').file('lib/gisture/version.rb').run!
-Gisture::Repo.new('markrebec/gisture').run!('lib/gisture/version.rb')
 ```
 
 Like gists, you can pass an execution strategy when running a file from a repo.
