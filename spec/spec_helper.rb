@@ -1,5 +1,6 @@
 require 'gisture'
 require 'rspec'
+require 'vcr'
 require 'coveralls'
 Coveralls.wear!
 
@@ -7,6 +8,11 @@ Dir[File.join(File.dirname(__FILE__), '..', "spec/support/**/*.rb")].each { |f| 
 
 Gisture.configure do |config|
   config.github.oauth_token = ENV['GITHUB_OAUTH_TOKEN']
+end
+
+VCR.configure do |config|
+  config.cassette_library_dir = "spec/cassettes"
+  config.hook_into :webmock
 end
 
 TEST_GIST_ID = "520b474ea0248d1a0a74"
