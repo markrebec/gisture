@@ -1,3 +1,5 @@
+require 'github_api/client/gists'
+
 module Github
   class Client::Gists < API
     def version(*args)
