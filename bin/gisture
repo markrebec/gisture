@@ -1,0 +1,73 @@
+#!/usr/bin/env ruby
+
+require 'rubygems'
+require 'gisture'
+require 'commander/import'
+
+program :name, 'gisture'
+program :version, Gisture::VERSION
+program :description, 'Run one-off gists or files from the command line'
+
+command :'gist clone' do |c|
+  c.syntax = 'gisture gist clone <gist>'
+  c.summary = 'Clone a github gist into a tempdir'
+  c.description = 'Clone a github gist into a tempdir directly from the command line'
+  c.example 'Clone a gist', 'gisture gist clone markrebec/520b474ea0248d1a0a74'
+  c.action do |args, options|
+    raise ArgumentError, "Please provide a gist ID or URL" if args.empty?
+    gist = Gisture.gist(args.first)
+    gist.clone!
+  end
+end
+
+command :'gist run' do |c|
+  c.syntax = 'gisture gist run <gist> [options]'
+  c.summary = 'Run a github gist'
+  c.description = 'Run a github gist directly from the command line'
+  c.example 'Run a gist using the defaults', 'gisture gist run markrebec/520b474ea0248d1a0a74'
+  c.example 'Clone your gist and run it from within the cloned path', 'gisture gist run markrebec/520b474ea0248d1a0a74 -c'
+  c.option '-f', '--filename FILENAME', String, 'Specify a filename if your gist has multiple files'
+  c.option '-s', '--strategy STRATEGY', String, "Execution strategy to use. Defaults to 'eval'"
+  c.option '-e', '--evaluator CLASS_NAME', String, "Use a custom evaluator class. Only applies when using the 'eval' strategy"
+  c.option '-c', '--clone', 'Clone the gist into a local tmp path and run from that working path'
+  c.action do |args, options|
+    raise ArgumentError, "Please provide a gist ID or URL" if args.empty?
+    gist = Gisture.gist(args.first, strategy: options.strategy, filename: options.filename)
+
+    options.clone ? gist.clone! : gist.destroy_clone!
+
+    if options.strategy == 'eval' && options.evaluator
+      result = gist.run!(options.evaluator)
+    else
+      result = gist.run!
+    end
+
+    if options.strategy == 'exec'
+      puts result
+    else
+      result
+    end
+  end
+end
+
+command :'repo run file' do |c|
+  c.syntax = 'gisture repo run file [options]'
+  c.summary = ''
+  c.description = ''
+  c.example 'description', 'command example'
+  c.option '--some-switch', 'Some switch that does something'
+  c.action do |args, options|
+    # Do something or c.when_called Gisture::Commands::Repo:file
+  end
+end
+
+command :'repo run gist' do |c|
+  c.syntax = 'gisture repo run gist [options]'
+  c.summary = ''
+  c.description = ''
+  c.example 'description', 'command example'
+  c.option '--some-switch', 'Some switch that does something'
+  c.action do |args, options|
+    # Do something or c.when_called Gisture::Commands::Repo:gist
+  end
+end
