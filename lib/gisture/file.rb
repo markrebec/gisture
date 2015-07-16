@@ -113,9 +113,9 @@ module Gisture
       self.strategy = strategy || Gisture.configuration.strategy
     end
 
-    def include!(strategy, &block)
-      Gisture.logger.info "[gisture] Running #{::File.join(basename, (file.filename || file.path))} via the :#{strategy.to_s} strategy"
-      included = eval("#{strategy} tempfile.path")#load tempfile.path
+    def include!(strat, &block)
+      Gisture.logger.info "[gisture] Running #{::File.join(basename, (file.filename || file.path))} via the :#{strat.to_s} strategy"
+      included = eval("#{strat} tempfile.path")#load tempfile.path
       unlink_tempfile
       block_given? ? yield : included
     end
