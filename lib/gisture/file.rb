@@ -65,6 +65,7 @@ module Gisture
     end
 
     def tempfile
+      localize if localized_exists? # just use the localized file if it exists
       @tempfile ||= begin
         tmpfile = Tempfile.new([basename.to_s.gsub(/\//, '-'), file.filename, extname].compact, Gisture.configuration.tmpdir)
         tmpfile.write(file.content)
@@ -73,19 +74,22 @@ module Gisture
       end
     end
 
-    def unlink_tempfile
+    def unlink!
       tempfile.unlink
       @tempfile = nil
     end
-    alias_method :unlink, :unlink_tempfile
 
     def localized_path
       raise "Cannot localize without a root path" if root.nil?
       ::File.join(root, (file.path || file.filename))
     end
 
+    def exists_locally?
+      ::File.exists?(localized_path)
+    end
+
     def localized?
-      ::File.exists?(localized_path) && localize
+      exists_locally? && localize
     end
 
     def localize
@@ -109,6 +113,7 @@ module Gisture
 
     def delocalize!
       FileUtils.rm_f localized_path
+      @tempfile = nil
     end
 
     def extname
@@ -137,7 +142,7 @@ module Gisture
     def include!(strat, &block)
       Gisture.logger.info "[gisture] Running #{::File.join(basename, (file.filename || file.path))} via the :#{strat.to_s} strategy"
       included = eval("#{strat} tempfile.path")#load tempfile.path
-      unlink_tempfile
+      unlink!
       block_given? ? yield : included
     end
 
