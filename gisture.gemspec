@@ -12,7 +12,6 @@ Gem::Specification.new do |s|
 
   s.files       = Dir["lib/**/*"]
   s.test_files  = Dir["spec/**/*"]
-  s.executables = "gisture"
 
   s.add_dependency "canfig"
   s.add_dependency "hashie"
