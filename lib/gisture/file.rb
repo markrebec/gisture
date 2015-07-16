@@ -80,7 +80,7 @@ module Gisture
     end
 
     def localized_path
-      raise "Cannot localize without a root path" if root.nil?
+      raise FileLocalizationError, "Cannot localize without a :root path" if root.nil?
       ::File.join(root, (file.path || file.filename))
     end
 

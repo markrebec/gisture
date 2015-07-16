@@ -4,4 +4,6 @@ module Gisture
       super("Gists from '#{owner}' have not been whitelisted for execution. Add them to the 'owners' configuration option.")
     end
   end
+
+  class FileLocalizationError < StandardError; end
 end
