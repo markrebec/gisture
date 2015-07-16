@@ -6,4 +6,5 @@ module Gisture
   end
 
   class FileLocalizationError < StandardError; end
+  class AmbiguousRepoFile < StandardError; end
 end

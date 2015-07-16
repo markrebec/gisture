@@ -15,15 +15,19 @@ module Gisture
         file(path, strategy: strategy).run!(&block)
       end
 
+      def parse_url(type, url)
+        matched = url.match(eval("#{type.to_s.upcase}_URL_REGEX"))
+        raise ArgumentError, "Invalid argument: '#{url}' is not a valid #{type.to_s} URL." if matched.nil?
+        matched
+      end
+
       def parse_repo_url(repo_url)
-        matched = repo_url.match(REPO_URL_REGEX)
-        raise ArgumentError, "Invalid argument: '#{repo_url}' is not a valid repo URL." if matched.nil?
+        matched = parse_url(:repo, repo_url)
         [matched[3], matched[4]]
       end
 
       def parse_file_url(file_url)
-        matched = file_url.match(FILE_URL_REGEX)
-        raise ArgumentError, "Invalid argument: '#{file_url}' is not a valid file path." if matched.nil?
+        matched = parse_url(:file, file_url)
         [matched[3], matched[6]]
       end
     end
@@ -55,10 +59,8 @@ module Gisture
 
     def gists(path)
       if ::File.basename(path).match(GISTURE_FILE_REGEX)
-        # if the path is a gisture file, load it into a Repo::Gist
         [Gisture::Repo::Gist.new(self, path)]
-      else
-        # it must be a directory, so look for gisture files and load them into Repo::Gists
+      else # must be a directory, look for gists
         files(path).select { |f| f.name.match(GISTURE_FILE_REGEX) }.map { |f| Gisture::Repo::Gist.new(self, f.path) }
       end
     end
@@ -68,12 +70,15 @@ module Gisture
     end
 
     def run!(path, &block)
+      # best guess that it's a gisture file or a directory, otherwise try a file
       if ::File.basename(path).match(GISTURE_FILE_REGEX) || ::File.extname(path).empty?
-        # best guess that it's a gisture file or a directory
         gists(path).map { |gist| gist.run!(&block) }
       else
         file(path).run!(&block)
       end
+    rescue => e
+      Gisture.logger.error "[gisture] #{e.class.name}: #{e.message}\n\t[gisture] #{e.backtrace.join("\n\t[gisture] ")}"
+      raise AmbiguousRepoFile, "Don't know how to run 'path', try running it as a gist or a file specifically"
     end
     alias_method :run, :run!
 
