@@ -67,7 +67,7 @@ module Gisture
 
     def clone!(&block)
       destroy_clone!
-      clone
+      clone(&block)
     end
 
     def clone(&block)
