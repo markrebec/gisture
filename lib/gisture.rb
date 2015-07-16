@@ -6,11 +6,11 @@ require 'gisture/version'
 require 'gisture/errors'
 require 'gisture/evaluator'
 require 'gisture/file'
-require 'gisture/cloned_file'
-require 'gisture/repo_file'
+require 'gisture/file/cloned'
 require 'gisture/gist'
 require 'gisture/repo'
-require 'gisture/repo_gist'
+require 'gisture/repo/file'
+require 'gisture/repo/gist'
 require 'gisture/railtie' if defined?(Rails)
 
 module Gisture

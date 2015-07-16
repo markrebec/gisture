@@ -38,10 +38,10 @@ module Gisture
 
     def file(path, strategy: nil)
       if cloned?
-        Gisture::ClonedFile.new(clone_path, path, basename: "#{owner}/#{project}", strategy: strategy)
+        Gisture::File::Cloned.new(clone_path, path, basename: "#{owner}/#{project}", strategy: strategy)
       else
         file = github.repos.contents.get(user: owner, repo: project, path: path).body
-        Gisture::RepoFile.new(file, basename: "#{owner}/#{project}", root: clone_path, strategy: strategy)
+        Gisture::Repo::File.new(file, basename: "#{owner}/#{project}", root: clone_path, strategy: strategy)
       end
     end
 

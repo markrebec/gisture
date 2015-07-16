@@ -51,7 +51,7 @@ module Gisture
       raise ArgumentError, "The filename '#{fname}' was not found in the list of files for the gist '#{gist_id}'" if gist.files[fname].nil?
 
       if cloned?
-        Gisture::ClonedFile.new(clone_path, fname, basename: "#{owner}/#{gist_id}", strategy: strategy)
+        Gisture::File::Cloned.new(clone_path, fname, basename: "#{owner}/#{gist_id}", strategy: strategy)
       else
         Gisture::File.new(gist.files[fname], basename: "#{owner}/#{gist_id}", strategy: strategy)
       end

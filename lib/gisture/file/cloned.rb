@@ -1,5 +1,5 @@
 module Gisture
-  class ClonedFile < File
+  class File::Cloned < File
 
     def require!(*args, &block)
       @cwd = Dir.pwd

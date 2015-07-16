@@ -1,5 +1,5 @@
 module Gisture
-  class RepoFile < File
+  class Repo::File < File
     protected
 
     def initialize(file, basename: nil, root: nil, strategy: nil)
