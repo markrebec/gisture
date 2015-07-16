@@ -30,11 +30,9 @@ module Gisture
 
     def eval!(*args, &block)
       Gisture.logger.info "[gisture] Running #{::File.join(basename, (file.filename || file.path))} via the :eval strategy"
-      args << Gisture::Evaluator
-      klass = args.first
-      evaluator = klass.new(file.content)
-      evaluator.instance_eval &block if block_given?
-      evaluator
+      evalor = evaluator(*args)
+      evalor.instance_eval &block if block_given?
+      evalor
     end
 
     def exec!(*args, &block)
@@ -118,6 +116,13 @@ module Gisture
       included = eval("#{strat} tempfile.path")#load tempfile.path
       unlink_tempfile
       block_given? ? yield : included
+    end
+
+    def evaluator(*args)
+      # push the default evaluator onto args so it gets used if no args were passed
+      args << Gisture::Evaluator
+      klass = eval(args.first.to_s)
+      klass.new(file.content)
     end
   end
 end
