@@ -78,7 +78,7 @@ module Gisture
       end
     rescue => e
       Gisture.logger.error "[gisture] #{e.class.name}: #{e.message}\n\t[gisture] #{e.backtrace.join("\n\t[gisture] ")}"
-      raise AmbiguousRepoFile, "Don't know how to run 'path', try running it as a gist or a file specifically"
+      raise AmbiguousRepoFile, "Don't know how to run '#{path}', try running it as a gist or a file specifically"
     end
     alias_method :run, :run!
 
