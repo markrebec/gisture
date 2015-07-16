@@ -65,6 +65,7 @@ module Gisture
     end
 
     def tempfile
+      return @tempfile unless @tempfile.nil?
       localize if exists_locally? # just use the localized file if it exists
       @tempfile ||= begin
         tmpfile = Tempfile.new([basename.to_s.gsub(/\//, '-'), file.filename, extname].compact, Gisture.configuration.tmpdir)
@@ -80,8 +81,9 @@ module Gisture
     end
 
     def localized_path
-      raise FileLocalizationError, "Cannot localize without a :root path" if root.nil?
       ::File.join(root, (file.path || file.filename))
+    rescue => e
+      nil.to_s
     end
 
     def exists_locally?
@@ -101,6 +103,7 @@ module Gisture
     end
 
     def localize!
+      raise FileLocalizationError, "Cannot localize without a :root path" if root.nil?
       @tempfile = begin
         Gisture.logger.info "[gisture] Localizing #{file.path || file.filename} into #{root}"
         FileUtils.mkdir_p ::File.dirname(localized_path)
