@@ -1,6 +1,3 @@
 #!/usr/bin/env ruby
 
 require 'gisture'
-require 'gisture/cli'
-
-Gisture::CLI.start(*ARGV)
