@@ -65,7 +65,7 @@ module Gisture
     end
 
     def tempfile
-      localize if localized_exists? # just use the localized file if it exists
+      localize if exists_locally? # just use the localized file if it exists
       @tempfile ||= begin
         tmpfile = Tempfile.new([basename.to_s.gsub(/\//, '-'), file.filename, extname].compact, Gisture.configuration.tmpdir)
         tmpfile.write(file.content)
