@@ -31,7 +31,7 @@ module Gisture
     def eval!(*args, &block)
       Gisture.logger.info "[gisture] Running #{::File.join(basename, (file.filename || file.path))} via the :eval strategy"
       evalor = evaluator(*args)
-      evalor.instance_eval &block if block_given?
+      evalor.evaluate(&block)
       evalor
     end
 

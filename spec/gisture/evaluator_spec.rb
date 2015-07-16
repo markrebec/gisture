@@ -21,6 +21,7 @@ RSpec.describe Gisture::Evaluator do
     subject { Gisture::Evaluator.new("1+1") }
 
     it "stores the result returned by evaluating the block" do
+      subject.evaluate
       expect(subject.result).to eql(2)
     end
   end
