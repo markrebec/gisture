@@ -21,17 +21,11 @@ module Gisture
     end
 
     def require!(*args, &block)
-      Gisture.logger.info "[gisture] Running #{::File.join(basename, (file.filename || file.path))} via the :require strategy"
-      required = require tempfile.path
-      unlink_tempfile
-      block_given? ? yield : required
+      include!(:require, &block)
     end
 
     def load!(*args, &block)
-      Gisture.logger.info "[gisture] Running #{::File.join(basename, (file.filename || file.path))} via the :load strategy"
-      loaded = load tempfile.path
-      unlink_tempfile
-      block_given? ? yield : loaded
+      include!(:load, &block)
     end
 
     def eval!(*args, &block)
@@ -117,6 +111,13 @@ module Gisture
       @file = file
       @basename = basename
       self.strategy = strategy || Gisture.configuration.strategy
+    end
+
+    def include!(strategy, &block)
+      Gisture.logger.info "[gisture] Running #{::File.join(basename, (file.filename || file.path))} via the :#{strategy.to_s} strategy"
+      included = eval("#{strategy} tempfile.path")#load tempfile.path
+      unlink_tempfile
+      block_given? ? yield : included
     end
   end
 end
