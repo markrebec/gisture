@@ -2,6 +2,7 @@ module Gisture
   class Gist
     attr_reader :filename, :gist_id, :strategy, :version
 
+    GIST_PATH_REGEX = /\A[a-z0-9_\-]+\/([0-9a-f]{20,20})\/?\Z/
     GIST_URL_REGEX = /\Ahttp.+([0-9a-f]{20,20})\/?\Z/
     GIST_URL_WITH_VERSION_REGEX = /\Ahttp.+([0-9a-f]{20,20})\/([0-9a-f]{40,40})\/?\Z/
 
@@ -136,6 +137,8 @@ module Gisture
         return [matches[1], matches[2]]
       when GIST_URL_REGEX
         return [gist_url.match(GIST_URL_REGEX)[1], nil]
+      when GIST_PATH_REGEX
+        return [gist_url.match(GIST_PATH_REGEX)[1], nil]
       else
         raise ArgumentError, "Invalid argument: #{gist_url} is not a valid gist URL."
       end
