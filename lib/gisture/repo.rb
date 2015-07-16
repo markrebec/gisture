@@ -41,7 +41,7 @@ module Gisture
         Gisture::ClonedFile.new(clone_path, path, basename: "#{owner}/#{project}", strategy: strategy)
       else
         file = github.repos.contents.get(user: owner, repo: project, path: path).body
-        Gisture::RepoFile.new(file, basename: "#{owner}/#{project}", strategy: strategy)
+        Gisture::RepoFile.new(file, basename: "#{owner}/#{project}", root: clone_path, strategy: strategy)
       end
     end
 
@@ -53,59 +53,29 @@ module Gisture
       end
     end
 
-    # TODO move all the gisture/gisticulate stuff into a separate class (Gisture? Gisticulation?)
-
-    def gistures(path)
+    def gists(path)
       if ::File.basename(path).match(GISTURE_FILE_REGEX)
-        [Hashie::Mash.new(YAML.load(file(path).content).symbolize_keys)]
+        # if the path is a gisture file, load it into a Repo::Gist
+        [Gisture::Repo::Gist.new(self, path)]
       else
-        files(path).select { |f| f.name.match(GISTURE_FILE_REGEX) }.map { |f| Hashie::Mash.new(YAML.load(file(f.path).content).symbolize_keys) }
+        # it must be a directory, so look for gisture files and load them into Repo::Gists
+        files(path).select { |f| f.name.match(GISTURE_FILE_REGEX) }.map { |f| Gisture::Repo::Gist.new(self, f.path) }
       end
     end
 
-    def gisticulate(gisture, &block)
-      if gisture.key?(:gistures) || gisture.key?(:gists)
-        gists = (gisture[:gistures] || gisture[:gists])
-        gists = gists.values if gists.respond_to?(:values)
-        clone! if gists.any? { |g| g[:clone] == true } # force clone once up front for a refresh
-        gists.map { |gist| gisticulate(gist, &block) }
+    def gist(path)
+      gists(path).first
+    end
+
+    def run!(path, &block)
+      if ::File.basename(path).match(GISTURE_FILE_REGEX) || ::File.extname(path).empty?
+        # best guess that it's a gisture file or a directory
+        gists(path).map { |gist| gist.run!(&block) }
       else
-        clone if gisture[:clone] == true
-
-        run_options = []
-        run_options << eval(gisture[:evaluator]) if (!gisture.key?(:strategy) || gisture[:strategy].to_sym == :eval) && gisture.key?(:evaluator)
-        run_options = gisture[:executor] if (gisture.key?(:strategy) && gisture[:strategy].to_sym == :exec) && gisture.key?(:executor)
-
-        if gisture[:resources] && !cloned?
-          # localize and pull down any relevant resources
-          gisture[:resources].each do |resource|
-            Gisture.logger.info "[gisture] Localizing resource #{::File.join(owner, project, resource)} into #{clone_path}"
-            file(resource).localize!(clone_path)
-          end
-
-          # localize the file we're running
-          Gisture.logger.info "[gisture] Localizing gisture #{::File.join(owner, project, gisture[:path])} into #{clone_path}"
-          gfile = file(gisture[:path], strategy: gisture[:strategy])
-          gfile.localize!(clone_path)
-
-          # chdir into the localized temp path
-          cwd = Dir.pwd
-          Dir.chdir clone_path
-          result = gfile.run!(*run_options, &block)
-          Dir.chdir cwd
-          result
-        else
-          file(gisture[:path], strategy: gisture[:strategy]).run!(*run_options, &block)
-        end
+        file(path).run!(&block)
       end
     end
-
-    def run(path, &block)
-      gists = gistures(path)
-      clone! if gists.any? { |g| g[:clone] == true } # force clone once up front for a refresh
-      gists.map { |g| gisticulate(g, &block) }
-    end
-    alias_method :run!, :run
+    alias_method :run, :run!
 
     def clone_path
       @clone_path ||= ::File.join(Gisture.configuration.tmpdir, owner, project)

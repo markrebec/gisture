@@ -1,10 +1,9 @@
 module Gisture
   class ClonedFile < File
-    attr_reader :clone_path
 
     def require!(*args, &block)
       @cwd = Dir.pwd
-      Dir.chdir clone_path
+      Dir.chdir root
       super
     ensure
       Dir.chdir @cwd
@@ -12,7 +11,7 @@ module Gisture
 
     def load!(*args, &block)
       @cwd = Dir.pwd
-      Dir.chdir clone_path
+      Dir.chdir root
       super
     ensure
       Dir.chdir @cwd
@@ -20,7 +19,7 @@ module Gisture
 
     def eval!(*args, &block)
       @cwd = Dir.pwd
-      Dir.chdir clone_path
+      Dir.chdir root
       super
     ensure
       Dir.chdir @cwd
@@ -28,7 +27,7 @@ module Gisture
 
     def exec!(*args, &block)
       @cwd = Dir.pwd
-      Dir.chdir clone_path
+      Dir.chdir root
       super
     ensure
       Dir.chdir @cwd
@@ -42,10 +41,9 @@ module Gisture
 
     def initialize(clone_path, file_path, basename: nil, strategy: nil)
       path = ::File.join(clone_path, file_path)
-      @clone_path = clone_path
       @tempfile = ::File.new(path)
       file_hash = Hashie::Mash.new({path: path, filename: file_path, content: tempfile.read})
-      super(file_hash, basename: basename, strategy: strategy)
+      super(file_hash, basename: basename, root: clone_path, strategy: strategy)
     end
   end
 end

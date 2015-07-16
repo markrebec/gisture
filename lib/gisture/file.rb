@@ -2,7 +2,7 @@ require 'tempfile'
 
 module Gisture
   class File
-    attr_reader :file, :basename, :strategy
+    attr_reader :file, :basename, :root, :strategy
 
     STRATEGIES = [:eval, :exec, :load, :require]
 
@@ -73,26 +73,48 @@ module Gisture
       end
     end
 
-    def localize!(root)
+    def unlink_tempfile
+      tempfile.unlink
+      @tempfile = nil
+    end
+    alias_method :unlink, :unlink_tempfile
+
+    def localized_path
+      raise "Cannot localize without a root path" if root.nil?
+      ::File.join(root, (file.path || file.filename))
+    end
+
+    def localized?
+      ::File.exists?(localized_path) && localize
+    end
+
+    def localize
+      if localized?
+        @tempfile ||= ::File.new(localized_path)
+      else
+        localize!
+      end
+    end
+
+    def localize!
       @tempfile = begin
-        fname = ::File.join(root, (file.path || file.filename))
-        FileUtils.mkdir_p ::File.dirname(fname)
-        local_file = ::File.open(fname, 'w')
+        Gisture.logger.info "[gisture] Localizing #{file.path || file.filename} into #{root}"
+        FileUtils.mkdir_p ::File.dirname(localized_path)
+        local_file = ::File.open(localized_path, 'w')
         local_file.write(file.content)
         local_file.close
         local_file
       end
     end
 
+    def delocalize!
+      FileUtils.rm_f localized_path
+    end
+
     def extname
       @extname ||= ::File.extname(file.filename)
     end
     alias_method :extension, :extname
-
-    def unlink_tempfile
-      tempfile.unlink
-      @tempfile = nil
-    end
 
     def method_missing(meth, *args, &block)
       return file.send(meth, *args, &block) if file.respond_to?(meth)
@@ -105,9 +127,10 @@ module Gisture
 
     protected
 
-    def initialize(file, basename: nil, strategy: nil)
+    def initialize(file, basename: nil, root: nil, strategy: nil)
       @file = file
       @basename = basename
+      @root = root
       self.strategy = strategy || Gisture.configuration.strategy
     end
 

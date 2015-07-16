@@ -10,6 +10,7 @@ require 'gisture/cloned_file'
 require 'gisture/repo_file'
 require 'gisture/gist'
 require 'gisture/repo'
+require 'gisture/repo_gist'
 require 'gisture/railtie' if defined?(Rails)
 
 module Gisture
