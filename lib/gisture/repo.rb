@@ -1,5 +1,7 @@
 module Gisture
   class Repo
+    include Cloneable
+
     attr_reader :owner, :project
 
     class << self
@@ -72,48 +74,8 @@ module Gisture
     end
     alias_method :run, :run!
 
-    def clone_path
-      @clone_path ||= ::File.join(Gisture.configuration.tmpdir, owner, project)
-    end
-
     def clone_url
       "https://#{Gisture.configuration.github.auth_str}@github.com/#{owner}/#{project}.git"
-    end
-
-    def clone!(&block)
-      destroy_clone!
-      clone(&block)
-    end
-
-    def clone(&block)
-      return self if cloned?
-
-      Gisture.logger.info "[gisture] Cloning #{owner}/#{project} into #{clone_path}"
-      Git.clone(clone_url, project, path: ::File.dirname(clone_path))
-      stamp_clone!
-
-      if block_given?
-        instance_eval &block
-        destroy_clone!
-      end
-
-      self
-    end
-
-    def stamp_clone!
-      FileUtils.rm_rf("#{clone_path}/.git")
-      ::File.write("#{clone_path}/.gisture", Time.now.to_i.to_s)
-    end
-
-    def destroy_cloned_files!
-      FileUtils.rm_rf(clone_path)
-    end
-    alias_method :destroy_clone!, :destroy_cloned_files!
-
-    def cloned?
-      ::File.read("#{clone_path}/.gisture").strip
-    rescue
-      false
     end
 
     protected
