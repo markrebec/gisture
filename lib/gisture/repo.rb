@@ -100,9 +100,10 @@ module Gisture
       self
     end
 
-    def destroy_clone!
+    def destroy_cloned_files!
       FileUtils.rm_rf(clone_path)
     end
+    alias_method :destroy_clone!, :destroy_cloned_files!
 
     def cloned?
       ::File.read("#{clone_path}/.gisture").strip

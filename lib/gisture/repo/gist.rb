@@ -16,9 +16,9 @@ module Gisture
       # can be a hash of hashes or an array of hashes
       hashes = (gist[:gistures] || gist[:gists] || [])
       if hashes.is_a?(Array)
-        hashes = hashes.each_with_index.map { |h,i| {name: "gist #{i+1}"}.merge(h) }
+        hashes = hashes.each_with_index.map { |h,i| {name: "#{gist[:name]}:#{i+1}"}.merge(h) }
       else
-        hashes = hashes.map { |k,v| {name: k}.merge(v) }
+        hashes = hashes.map { |k,v| {name: "#{gist[:name]}:#{k}"}.merge(v) }
       end
       hashes
     end
@@ -68,12 +68,14 @@ module Gisture
     end
 
     def destroy_cloned_files!
+      return false if repo.cloned?
       resources.each do |resource|
         resource.delocalize!
       end
 
       runnable.delocalize!
     end
+    alias_method :destroy_clone!, :destroy_cloned_files!
 
     def run_options
       run_opts = []
@@ -84,19 +86,27 @@ module Gisture
 
     def run!(*args, &block)
       if multi?
-        Gisture.logger.info "[gisture] Found multi-gist '#{gist.name}' with #{gists.count} gists"
+        Gisture.logger.info "[gisture] Found multi-gist #{gist.name} with #{gists.count} gists"
         gists.run!(*args, &block)
       else
-        Gisture.logger.info "[gisture] Preparing '#{gist.name}' from #{::File.join(repo.owner, repo.project)}"
-        clone!
-        chdir_and_run!(*args, &block)
+        Gisture.logger.info "[gisture] Found gist #{gist.name} from #{::File.join(repo.owner, repo.project)}"
+        if clone?
+          clone_and_run!(*args, &block)
+        else
+          runnable.run!(*run_options.concat(args), &block)
+        end
       end
     end
 
-    def chdir_and_run!(*args, &block)
+    def clone_and_run!(*args, &block)
+      clone!
+      chdir_and_run!(clone_path, *args, &block)
+    end
+
+    def chdir_and_run!(path, *args, &block)
       cwd = Dir.pwd
-      Dir.chdir clone_path
-      result = runnable.run!(*run_options, &block)
+      Dir.chdir path
+      result = runnable.run!(*run_options.concat(args), &block)
       Dir.chdir cwd
       result
     end
@@ -106,7 +116,7 @@ module Gisture
     def initialize(repo, gist)
       @repo = repo
       @gist = Hashie::Mash.new(gist)
-      @gist[:name] ||= 'unnamed gist'
+      @gist[:name] ||= @gist[:path]
     end
   end
 end

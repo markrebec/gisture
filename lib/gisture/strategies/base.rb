@@ -19,7 +19,7 @@ module Gisture
       end
 
       def log!
-        Gisture.logger.info "[gisture] Running #{::File.join(file.basename, (file.file.filename || file.file.path))} via the :#{self.class.name.split('::').last.downcase} strategy"
+        Gisture.logger.info "[gisture] Running #{::File.join(file.basename, (file.file.filename || file.file.path))} from #{Dir.pwd} via the :#{self.class.name.split('::').last.downcase} strategy"
       end
     end
   end
