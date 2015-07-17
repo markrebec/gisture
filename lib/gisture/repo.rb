@@ -49,9 +49,9 @@ module Gisture
 
     def gists(path)
       if ::File.basename(path).match(Gisture::GISTURE_FILE_REGEX)
-        [Gisture::Repo::Gist.new(self, path)]
-      else # must be a directory, look for gists
-        files(path).select { |f| f.name.match(Gisture::GISTURE_FILE_REGEX) }.map { |f| Gisture::Repo::Gist.new(self, f.path) }
+        Gisture::Repo::Gists.new([Gisture::Repo::Gist.new(self, path)])
+      else # must be a directory, so let's look for gists
+        Gisture::Repo::Gists.new(files(path).select { |f| f.name.match(Gisture::GISTURE_FILE_REGEX) }.map { |f| Gisture::Repo::Gist.new(self, f.path) })
       end
     end
 
@@ -62,7 +62,7 @@ module Gisture
     def run!(path, *args, strategy: nil, evaluator: nil, executor: nil, &block)
       # best guess that it's a gisture file or a directory, otherwise try a file
       if ::File.basename(path).match(Gisture::GISTURE_FILE_REGEX) || ::File.extname(path).empty?
-        gists(path).map { |gist| gist.run!(*args, &block) }
+        gists(path).run!(*args, &block)
       else
         file(path, strategy: strategy, evaluator: evaluator, executor: executor).run!(*args, &block)
       end

@@ -7,7 +7,7 @@ module Gisture
     end
 
     def gists
-      @gists ||= (gist[:gistures] || gist[:gists] || {}).values.map { |mg| self.class.new(repo, mg) }
+      @gists ||= Repo::Gists.new((gist[:gistures] || gist[:gists] || {}).values.map { |mg| self.class.new(repo, mg) })
     end
 
     def gist
@@ -71,7 +71,7 @@ module Gisture
 
     def run!(*args, &block)
       if multi?
-        gists.map { |gist| gist.run!(*args, &block) }
+        gists.run!(*args, &block)
       else
         clone!
         chdir_and_run!(*args, &block)

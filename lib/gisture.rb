@@ -11,6 +11,7 @@ require 'gisture/file/cloned'
 require 'gisture/gist'
 require 'gisture/repo'
 require 'gisture/repo/file'
+require 'gisture/repo/gists'
 require 'gisture/repo/gist'
 require 'gisture/railtie' if defined?(Rails)
 
