@@ -79,15 +79,23 @@ module Gisture
 
     def run!(*args, &block)
       if multi?
-        Gisture.logger.info "[gisture] Found multi-gist #{gist.name} with #{gists.count} gists"
-        gists.run!(*args, &block)
+        run_gists!(*args, &block)
       else
-        Gisture.logger.info "[gisture] Found gist #{gist.name} from #{::File.join(repo.owner, repo.project)}"
-        if clone?
-          clone_and_run!(*args, &block)
-        else
-          run_with_options!(*args, &block)
-        end
+        run_gist!(*args, &block)
+      end
+    end
+
+    def run_gists!(*args, &block)
+      Gisture.logger.info "[gisture] Found multi-gist #{gist.name} with #{gists.count} gists"
+      gists.run!(*args, &block)
+    end
+
+    def run_gist!(*args, &block)
+      Gisture.logger.info "[gisture] Found gist #{gist.name} from #{::File.join(repo.owner, repo.project)}"
+      if clone?
+        clone_and_run!(*args, &block)
+      else
+        run_with_options!(*args, &block)
       end
     end
 
@@ -97,11 +105,7 @@ module Gisture
     end
 
     def chdir_and_run!(path, *args, &block)
-      cwd = Dir.pwd
-      Dir.chdir path
-      result = run_with_options!(*args, &block)
-      Dir.chdir cwd
-      result
+      Dir.chdir(path) { run_with_options!(*args, &block) }
     end
 
     def run_with_options!(*args, &block)

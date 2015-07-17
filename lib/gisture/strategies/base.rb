@@ -4,11 +4,7 @@ module Gisture
       attr_reader :file
 
       def run_from!(path, *args, &block)
-        cwd = Dir.pwd
-        Dir.chdir path
-        result = run!(*args, &block)
-        Dir.chdir cwd
-        result
+        Dir.chdir(path) { run!(*args, &block) }
       end
       alias_method :run_in!, :run_from!
 
