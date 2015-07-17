@@ -10,11 +10,10 @@ module Gisture
 
       protected
 
-      def initialize(content, filename: nil, project: nil, file: nil)
-        file ||= Hashie::Mash.new(file: Hashie::Mash.new)
-        @content = content || file.content
-        @project = project || file.basename || 'gisture/tmp'
-        @relpath = filename || ::File.join(@project, (file.file.path || file.file.filename || 'anonymous'))
+      def initialize(content, filename: nil, project: nil)
+        @content = content
+        @project = project || 'gisture/tmp'
+        @relpath = filename || 'anonymous'
         @filename = ::File.basename(@relpath)
         @extname = ::File.extname(@filename)
       end

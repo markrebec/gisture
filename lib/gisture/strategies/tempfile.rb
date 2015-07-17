@@ -15,8 +15,8 @@ module Gisture
 
       protected
 
-      def initialize(content, filename: nil, project: nil, file: nil, tempfile: nil)
-        super(content, project: project, filename: filename, file: file)
+      def initialize(content, filename: nil, project: nil, tempfile: nil)
+        super(content, project: project, filename: filename)
         # allows overriding the tempfile with an existing cloned file path
         @tempfile = tempfile.is_a?(::File) ? tempfile : ::File.new(tempfile) unless tempfile.nil?
       end
