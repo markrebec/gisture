@@ -93,13 +93,19 @@ module Gisture
     Gisture::Repo.gists(path)
   end
 
+  def self.invalid_url!(url)
+    raise ArgumentError, "Invalid argument: #{url} does not appear to be a valid gist, repo or file."
+  end
+
   def self.parse_repo_url(repo_url)
-    raise ArgumentError, "Invalid argument: #{repo_url} does not appear to be a valid repo." unless repo = repo_url.match(REPO_URL_REGEX)
+    repo = repo_url.match(REPO_URL_REGEX)
+    invalid_url!(repo_url) if repo.nil?
     [repo[3], repo[4]]
   end
 
   def self.parse_file_url(file_url)
-    raise ArgumentError, "Invalid argument: #{file_url} does not appear to be a valid file." unless file = file_url.match(FILE_URL_REGEX)
+    file = file_url.match(FILE_URL_REGEX)
+    invalid_url!(file_url) if file.nil?
     [file[3], file[6]]
   end
 
@@ -115,7 +121,7 @@ module Gisture
     when GIST_ID_REGEX
       [gist_url.match(GIST_ID_REGEX)[1], nil]
     else
-      raise ArgumentError, "Invalid argument: #{gist_url} does not appear to be a valid gist."
+      invalid_url!(gist_url)
     end
   end
 end
