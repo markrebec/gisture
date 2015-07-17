@@ -56,13 +56,7 @@ module Gisture
 
   def self.new(url, strategy: nil, filename: nil, version: nil, evaluator: nil, executor: nil)
     case url.to_s
-    when GIST_VERSION_URL_REGEX
-      Gisture::Gist.new(url, strategy: strategy, filename: filename, version: version, evaluator: evaluator, executor: executor)
-    when GIST_URL_REGEX
-      Gisture::Gist.new(url, strategy: strategy, filename: filename, version: version, evaluator: evaluator, executor: executor)
-    when GIST_PATH_REGEX
-      Gisture::Gist.new(url, strategy: strategy, filename: filename, version: version, evaluator: evaluator, executor: executor)
-    when GIST_ID_REGEX
+    when GIST_VERSION_URL_REGEX, GIST_URL_REGEX, GIST_PATH_REGEX, GIST_ID_REGEX
       Gisture::Gist.new(url, strategy: strategy, filename: filename, version: version, evaluator: evaluator, executor: executor)
     when FILE_URL_REGEX
       if ::File.basename(url).match(GISTURE_FILE_REGEX)
