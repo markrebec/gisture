@@ -30,9 +30,9 @@ module Gisture
 
       protected
 
-      def initialize(file, content: nil, basename: nil, filepath: nil, relpath: nil, executor: nil)
+      def initialize(content, filename: nil, project: nil, file: nil, executor: nil)
+        super(content, project: project, filename: filename, file: file)
         @executor = executor
-        super(file, content: content, basename: basename, filepath: filepath, relpath: relpath)
       end
     end
   end

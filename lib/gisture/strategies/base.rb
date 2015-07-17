@@ -1,7 +1,7 @@
 module Gisture
   module Strategies
     class Base
-      attr_reader :content, :basename, :relpath, :filename, :extname
+      attr_reader :content, :project, :relpath, :filename, :extname
 
       def run_from!(path, *args, &block)
         Dir.chdir(path) { run!(*args, &block) }
@@ -10,12 +10,13 @@ module Gisture
 
       protected
 
-      def initialize(file, content: nil, basename: nil, filepath: nil, relpath: nil)
+      def initialize(content, filename: nil, project: nil, file: nil)
+        file ||= Hashie::Mash.new(file: Hashie::Mash.new)
         @content = content || file.content
-        @basename = basename || file.basename
-        @filename = ::File.basename(filename || file.file.filename || file.file.path)
+        @project = project || file.basename || 'gisture/tmp'
+        @relpath = filename || ::File.join(@project, (file.file.path || file.file.filename || 'anonymous'))
+        @filename = ::File.basename(@relpath)
         @extname = ::File.extname(@filename)
-        @relpath = relpath || ::File.join(@basename, @filename)
       end
 
       def klass_name
