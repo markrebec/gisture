@@ -76,6 +76,10 @@ module Gisture
       @clone_path ||= ::File.join(Gisture.configuration.tmpdir, owner, project)
     end
 
+    def clone_url
+      "https://#{Gisture.configuration.github.auth_str}@github.com/#{owner}/#{project}.git"
+    end
+
     def clone!(&block)
       destroy_clone!
       clone(&block)
@@ -85,12 +89,8 @@ module Gisture
       return self if cloned?
 
       Gisture.logger.info "[gisture] Cloning #{owner}/#{project} into #{clone_path}"
-
-      repo_url = "https://#{Gisture.configuration.github.auth_str}@github.com/#{owner}/#{project}.git"
-      Git.clone(repo_url, project, path: ::File.dirname(clone_path))
-
-      FileUtils.rm_rf("#{clone_path}/.git")
-      ::File.write("#{clone_path}/.gisture", Time.now.to_i.to_s)
+      Git.clone(clone_url, project, path: ::File.dirname(clone_path))
+      stamp_clone!
 
       if block_given?
         instance_eval &block
@@ -98,6 +98,11 @@ module Gisture
       end
 
       self
+    end
+
+    def stamp_clone!
+      FileUtils.rm_rf("#{clone_path}/.git")
+      ::File.write("#{clone_path}/.gisture", Time.now.to_i.to_s)
     end
 
     def destroy_cloned_files!
