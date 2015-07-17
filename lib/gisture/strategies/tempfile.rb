@@ -11,12 +11,7 @@ module Gisture
       end
 
       def tempfile
-        @tempfile ||= begin
-          tmpfile = ::Tempfile.new([file.basename.to_s.gsub(/\//, '-'), file.file.filename, file.extname].compact, Gisture.configuration.tmpdir)
-          tmpfile.write(file.file.content)
-          tmpfile.close
-          tmpfile
-        end
+        @tempfile ||= write_tempfile
       end
 
       def unlink!
@@ -29,6 +24,13 @@ module Gisture
       def initialize(file, tempfile: nil)
         super(file)
         @tempfile = tempfile.is_a?(::File) ? tempfile : ::File.new(tempfile) unless tempfile.nil?
+      end
+
+      def write_tempfile
+        tmpfile = ::Tempfile.new([file.basename.to_s.gsub(/\//, '-'), file.file.filename, file.extname].compact, Gisture.configuration.tmpdir)
+        tmpfile.write(file.file.content)
+        tmpfile.close
+        tmpfile
       end
     end
   end
