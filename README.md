@@ -191,15 +191,15 @@ rake gisture:run[abc123,load,my_method.rb,123abc,'my_method(whatever)']
 To run a YAML gisture from within a repository:
 
 ```
-rake gisture:repo:run[markrebec/gisture,path/to/gisture.yml]
+rake gisture:run[markrebec/gisture,path/to/gisture.yml]
 ```
 
 Or for a file in a repository:
 
 ```
-rake gisture:repo:file:run[markrebec/gisture,path/to/file.rb]
-rake gisture:repo:file:run[markrebec/gisture,path/to/file.rb,eval]
-rake gisture:repo:file:run[markrebec/gisture,path/to/file.rb,eval,'my_method(whatever)']
+rake gisture:run[markrebec/gisture,path/to/file.rb]
+rake gisture:run[markrebec/gisture,path/to/file.rb,eval]
+rake gisture:run[markrebec/gisture,path/to/file.rb,eval,'my_method(whatever)']
 ```
 
 ## TODO
