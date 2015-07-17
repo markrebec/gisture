@@ -42,10 +42,13 @@ module Gisture
       end
     end
 
+    def file_exists?(fname)
+      !gist.files[fname].nil?
+    end
+
     def file(fname=nil)
-      fname ||= filename
-      fname ||= gist.files.first[1].filename
-      raise ArgumentError, "The filename '#{fname}' was not found in the list of files for the gist '#{gist_id}'" if gist.files[fname].nil?
+      fname ||= (filename || gist.files.first[1].filename)
+      raise ArgumentError, "The filename '#{fname}' was not found in the list of files for the gist '#{gist_id}'" unless file_exists?(fname)
 
       if cloned?
         Gisture::File::Cloned.new(clone_path, fname, basename: "#{owner}/#{gist_id}", strategy: strategy, evaluator: evaluator, executor: executor)
@@ -62,6 +65,10 @@ module Gisture
       @clone_path ||= ::File.join(Gisture.configuration.tmpdir, owner, gist_id)
     end
 
+    def clone_url
+      @clone_url ||= "https://#{Gisture.configuration.github.auth_str}@gist.github.com/#{gist_id}.git"
+    end
+
     def clone!(&block)
       destroy_clone!
       clone(&block)
@@ -71,12 +78,8 @@ module Gisture
       return self if cloned?
 
       Gisture.logger.info "[gisture] Cloning #{owner}/#{gist_id} into #{clone_path}"
-
-      repo_url = "https://#{Gisture.configuration.github.auth_str}@gist.github.com/#{gist_id}.git"
-      Git.clone(repo_url, gist_id, path: ::File.dirname(clone_path))
-
-      FileUtils.rm_rf("#{clone_path}/.git")
-      ::File.write("#{clone_path}/.gisture", Time.now.to_i.to_s)
+      Git.clone(clone_url, gist_id, path: ::File.dirname(clone_path))
+      stamp_clone!
 
       if block_given?
         instance_eval &block
@@ -84,6 +87,12 @@ module Gisture
       end
 
       self
+    end
+
+    # removes the .git path and adds a .gisture stamp
+    def stamp_clone!
+      FileUtils.rm_rf("#{clone_path}/.git")
+      ::File.write("#{clone_path}/.gisture", Time.now.to_i.to_s)
     end
 
     def destroy_clone!
