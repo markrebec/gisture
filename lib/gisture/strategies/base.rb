@@ -3,6 +3,15 @@ module Gisture
     class Base
       attr_reader :file
 
+      def run_from!(path, *args, &block)
+        cwd = Dir.pwd
+        Dir.chdir path
+        result = run!(*args, &block)
+        Dir.chdir cwd
+        result
+      end
+      alias_method :run_in!, :run_from!
+
       protected
 
       def initialize(file)

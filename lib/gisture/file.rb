@@ -1,8 +1,6 @@
-require 'tempfile'
-
 module Gisture
   class File
-    attr_reader :evaluator, :executor, :file, :basename, :root, :strategy
+    attr_reader :evaluator, :executor, :file, :basename, :root, :localized, :strategy
 
     STRATEGIES = [:eval, :exec, :load, :require]
 
@@ -20,20 +18,21 @@ module Gisture
       send "#{strat_key}!".to_sym, *args, &block
     end
 
-    def require!(*args, &block)
-      Strategies::Require.new(self).run!(*args, &block)
-    end
-
-    def load!(*args, &block)
-      Strategies::Load.new(self).run!(*args, &block)
-    end
-
+    # TODO rework these to use .run_from!(root) if file is cloned/localized
     def eval!(*args, &block)
       Strategies::Eval.new(self).run!(*args, &block)
     end
 
     def exec!(*args, &block)
-      Strategies::Exec.new(self).run!(*args, &block)
+      Strategies::Exec.new(self, tempfile: @localized).run!(*args, &block)
+    end
+
+    def require!(*args, &block)
+      Strategies::Require.new(self, tempfile: @localized).run!(*args, &block)
+    end
+
+    def load!(*args, &block)
+      Strategies::Load.new(self, tempfile: @localized).run!(*args, &block)
     end
 
     def strategy=(strat)
@@ -41,22 +40,6 @@ module Gisture
       strat_key = strat.keys.first if strat.respond_to?(:keys)
       raise ArgumentError, "Invalid strategy '#{strat_key}'. Must be one of #{STRATEGIES.join(', ')}" unless STRATEGIES.include?(strat_key.to_sym)
       @strategy = strat
-    end
-
-    def tempfile
-      return @tempfile unless @tempfile.nil?
-      localize if exists_locally? # just use the localized file if it exists
-      @tempfile ||= begin
-        tmpfile = Tempfile.new([basename.to_s.gsub(/\//, '-'), file.filename, extname].compact, Gisture.configuration.tmpdir)
-        tmpfile.write(file.content)
-        tmpfile.close
-        tmpfile
-      end
-    end
-
-    def unlink!
-      tempfile.unlink
-      @tempfile = nil
     end
 
     def localized_path
@@ -75,7 +58,7 @@ module Gisture
 
     def localize
       if localized?
-        @tempfile ||= ::File.new(localized_path)
+        @localized ||= ::File.new(localized_path)
       else
         localize!
       end
@@ -83,20 +66,25 @@ module Gisture
 
     def localize!
       raise FileLocalizationError, "Cannot localize without a :root path" if root.nil?
-      @tempfile = begin
+      @localized = begin
         Gisture.logger.info "[gisture] Localizing #{file.path || file.filename} into #{root}"
         FileUtils.mkdir_p ::File.dirname(localized_path)
-        local_file = ::File.open(localized_path, 'w')
-        local_file.write(file.content)
-        local_file.close
-        local_file
+        localize_file!
       end
+    end
+
+    def localize_file!
+      local_file = ::File.open(localized_path, 'w')
+      local_file.write(file.content)
+      local_file.close
+      local_file
     end
 
     def delocalize!
       FileUtils.rm_f localized_path
-      @tempfile = nil
+      @localized = nil
     end
+    alias_method :unlink!, :delocalize!
 
     def extname
       @extname ||= ::File.extname(file.filename)

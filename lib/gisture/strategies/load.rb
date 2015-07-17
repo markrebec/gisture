@@ -1,6 +1,6 @@
 module Gisture
   module Strategies
-    class Load < Base
+    class Load < Tempfile
       include Include
 
       def run!(*args, &block)

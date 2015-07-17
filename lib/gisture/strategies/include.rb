@@ -3,8 +3,8 @@ module Gisture
     module Include
       def include!(strat, *args, &block)
         log!
-        included = eval("#{strat} file.tempfile.path")
-        file.unlink!
+        included = eval("#{strat} tempfile.path")
+        unlink!
         block_given? ? yield : included
       end
     end

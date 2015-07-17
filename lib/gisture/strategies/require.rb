@@ -1,6 +1,6 @@
 module Gisture
   module Strategies
-    class Require < Base
+    class Require < Tempfile
       include Include
 
       def run!(*args, &block)
