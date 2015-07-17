@@ -62,21 +62,28 @@ module Gisture
       runnable.delocalize!
     end
 
-    def run!(&block)
-      if multi?
-        gists.map { |gist| gist.run!(&block) }
-      else
-        run_options = []
-        run_options << eval(gist[:evaluator]) if (!gist.key?(:strategy) || gist[:strategy].to_sym == :eval) && gist.key?(:evaluator)
-        run_options = gist[:executor] if (gist.key?(:strategy) && gist[:strategy].to_sym == :exec) && gist.key?(:executor)
+    def run_options
+      run_opts = []
+      run_opts << eval(gist[:evaluator]) if (!gist.key?(:strategy) || gist[:strategy].to_sym == :eval) && gist.key?(:evaluator)
+      run_opts = gist[:executor] if (gist.key?(:strategy) && gist[:strategy].to_sym == :exec) && gist.key?(:executor)
+      run_opts
+    end
 
+    def run!(*args, &block)
+      if multi?
+        gists.map { |gist| gist.run!(*args, &block) }
+      else
         clone!
-        cwd = Dir.pwd
-        Dir.chdir clone_path
-        result = runnable.run!(*run_options, &block)
-        Dir.chdir cwd
-        result
+        chdir_and_run!(*args, &block)
       end
+    end
+
+    def chdir_and_run!(*args, &block)
+      cwd = Dir.pwd
+      Dir.chdir clone_path
+      result = runnable.run!(*run_options, &block)
+      Dir.chdir cwd
+      result
     end
 
     protected
