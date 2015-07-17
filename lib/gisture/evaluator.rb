@@ -5,7 +5,7 @@ module Gisture
     def evaluate(&block)
       instance_eval { @result = eval raw }
       instance_eval &block if block_given?
-      result
+      self
     end
 
     protected

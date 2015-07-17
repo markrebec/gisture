@@ -21,43 +21,19 @@ module Gisture
     end
 
     def require!(*args, &block)
-      include!(:require, &block)
+      Strategies::Require.new(self).run!(*args, &block)
     end
 
     def load!(*args, &block)
-      include!(:load, &block)
+      Strategies::Load.new(self).run!(*args, &block)
     end
 
     def eval!(*args, &block)
-      Gisture.logger.info "[gisture] Running #{::File.join(basename, (file.filename || file.path))} via the :eval strategy"
-      evalor = new_evaluator(*args)
-      evalor.evaluate(&block)
-      evalor
+      Strategies::Eval.new(self).run!(*args, &block)
     end
 
     def exec!(*args, &block)
-      Gisture.logger.info "[gisture] Running #{::File.join(basename, (file.filename || file.path))} via the :exec strategy"
-
-      # set args to the default executor array if none were passed and it exists
-      args = executor if args.empty? && executor.is_a?(Array)
-
-      # map nils to file path in args to allow easily inserting the filepath wherever
-      # makes sense in your executable arguments (i.e. 'ruby', '-v', nil, '--script-arg')
-      args.map! { |arg| arg.nil? ? tempfile.path : arg }
-
-      # attempt to apply a default interpreter if nothing was provided
-      # TODO create a legit map of default interpreter args and apply it
-      args = ['ruby'] if args.empty? && extname == '.rb'
-      args = ['node'] if args.empty? && extname == '.js'
-
-      # append the filepath if it was not inserted into the args already
-      args << tempfile.path unless args.include?(tempfile.path)
-
-      # make file executable if we're just invoking it directly
-      ::File.chmod(0744, tempfile.path) if args.length == 1
-
-      executed = `#{args.join(' ')}`.strip
-      block_given? ? yield : executed
+      Strategies::Exec.new(self).run!(*args, &block)
     end
 
     def strategy=(strat)
@@ -145,20 +121,6 @@ module Gisture
       @evaluator = evaluator || Gisture::Evaluator
       @executor = executor
       self.strategy = strategy || Gisture.configuration.strategy
-    end
-
-    def include!(strat, &block)
-      Gisture.logger.info "[gisture] Running #{::File.join(basename, (file.filename || file.path))} via the :#{strat.to_s} strategy"
-      included = eval("#{strat} tempfile.path")#load tempfile.path
-      unlink!
-      block_given? ? yield : included
-    end
-
-    def new_evaluator(*args)
-      # push the default evaluator onto args so it gets used if no args were passed
-      args << evaluator
-      klass = eval(args.first.to_s)
-      klass.new(file.content)
     end
   end
 end

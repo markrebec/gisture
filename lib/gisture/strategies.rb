@@ -1,0 +1,6 @@
+require 'gisture/strategies/base'
+require 'gisture/strategies/eval'
+require 'gisture/strategies/exec'
+require 'gisture/strategies/include'
+require 'gisture/strategies/require'
+require 'gisture/strategies/load'
