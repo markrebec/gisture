@@ -49,9 +49,9 @@ module Gisture
 
     def gists(path)
       if ::File.basename(path).match(Gisture::GISTURE_FILE_REGEX)
-        Gisture::Repo::Gists.new([Gisture::Repo::Gist.new(self, path)])
+        Gisture::Repo::Gists.new([Gisture::Repo::Gist.load(self, path)])
       else # must be a directory, so let's look for gists
-        Gisture::Repo::Gists.new(files(path).select { |f| f.name.match(Gisture::GISTURE_FILE_REGEX) }.map { |f| Gisture::Repo::Gist.new(self, f.path) })
+        Gisture::Repo::Gists.new(files(path).select { |f| f.name.match(Gisture::GISTURE_FILE_REGEX) }.map { |f| Gisture::Repo::Gist.load(self, f.path) })
       end
     end
 

@@ -20,7 +20,7 @@ module Gisture
       end
 
       def unlink!
-        tempfile.unlink
+        FileUtils.rm_f tempfile.path
         @tempfile = nil
       end
 

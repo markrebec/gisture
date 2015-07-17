@@ -1,17 +1,20 @@
 module Gisture
   class Repo::Gist
-    attr_reader :repo, :path
+    attr_reader :repo, :gist
+
+    def self.load(repo, path)
+      new(repo, Hashie::Mash.new(YAML.load(repo.file(path).content).symbolize_keys))
+    end
 
     def multi?
       gist.key?(:gistures) || gist.key?(:gists)
     end
 
     def gists
-      @gists ||= Repo::Gists.new((gist[:gistures] || gist[:gists] || {}).values.map { |mg| self.class.new(repo, mg) })
-    end
-
-    def gist
-      @gist ||= Hashie::Mash.new(YAML.load(file(path).content).symbolize_keys)
+      # can be a hash of hashes or an array of hashes
+      hashes = (gist[:gistures] || gist[:gists] || [])
+      hashes = hashes.values if hashes.respond_to?(:values)
+      @gists ||= Repo::Gists.new(hashes.map { |mg| self.class.new(repo, mg) })
     end
 
     def file(file_path, strategy: nil)
@@ -23,7 +26,7 @@ module Gisture
     end
 
     def resources
-      @resources ||= gist[:resources].map { |r| file(r) }
+      @resources ||= (gist[:resources] || []).map { |r| file(r) }
     end
 
     def clone?
@@ -88,9 +91,9 @@ module Gisture
 
     protected
 
-    def initialize(repo, path)
+    def initialize(repo, gist)
       @repo = repo
-      @path = path
+      @gist = gist
     end
   end
 end
