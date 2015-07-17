@@ -1,7 +1,0 @@
-gists:
-  - path: spec/gists/simple.rb
-    strategy: eval
-  - path: spec/gists/method.rb
-    strategy: load
-  - path: spec/gists/class.rb
-    strategy: require

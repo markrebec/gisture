@@ -1,0 +1,7 @@
+gists:
+  - path: examples/simple.rb
+    strategy: eval
+  - path: examples/method.rb
+    strategy: load
+  - path: examples/class.rb
+    strategy: require

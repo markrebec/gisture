@@ -1,4 +1,0 @@
-path: spec/gists/resourceful.rb
-resources:
-  - spec/gists/resourceful.txt
-  - lib/gisture/version.rb

@@ -1,4 +1,4 @@
-path: /spec/gists/simple.rb
+path: examples/simple.rb
 strategy: eval
 evaluator: "Gisture::Evaluator"
 executor: ['ruby', '-v']
