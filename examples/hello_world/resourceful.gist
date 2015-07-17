@@ -1,4 +1,4 @@
-path: examples/resourceful.rb
+path: examples/hello_world/resourceful.rb
 resources:
-  - examples/resourceful.txt
+  - examples/hello_world/resourceful.txt
   - lib/gisture/version.rb

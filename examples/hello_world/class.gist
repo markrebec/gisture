@@ -1,4 +1,4 @@
-path: examples/class.rb
+path: examples/hello_world/class.rb
 strategy: require
 evaluator: "Gisture::Evaluator"
 clone: true
