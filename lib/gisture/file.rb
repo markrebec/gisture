@@ -18,25 +18,30 @@ module Gisture
       send "#{strat_key}!".to_sym, *args, &block
     end
 
+    def relative_path
+      file.path || file.filename
+    end
+
+    def run_args
+      # important to use @localized here so it's nil if we haven't intentionally localized
+      @run_args ||= {filename: relative_path, project: basename, tempfile: @localized}
+    end
+
     # TODO rework these to use .run_from!(root) if file is cloned/localized
     def eval!(*args, &block)
-      Strategies::Eval.new(content, filename: relative_path, project: basename).run!(*args, &block)
+      Strategies::Eval.new(content, run_args.except(:tempfile)).run!(*args, &block)
     end
 
     def exec!(*args, &block)
-      Strategies::Exec.new(content, filename: relative_path, project: basename, tempfile: @localized).run!(*args, &block)
+      Strategies::Exec.new(content, run_args).run!(*args, &block)
     end
 
     def require!(*args, &block)
-      Strategies::Require.new(content, filename: relative_path, project: basename, tempfile: @localized).run!(*args, &block)
+      Strategies::Require.new(content, run_args).run!(*args, &block)
     end
 
     def load!(*args, &block)
-      Strategies::Load.new(content, filename: relative_path, project: basename, tempfile: @localized).run!(*args, &block)
-    end
-
-    def relative_path
-      file.path || file.filename
+      Strategies::Load.new(content, run_args).run!(*args, &block)
     end
 
     def strategy=(strat)
