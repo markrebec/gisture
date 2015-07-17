@@ -77,13 +77,6 @@ module Gisture
     end
     alias_method :destroy_clone!, :destroy_cloned_files!
 
-    def run_options
-      run_opts = []
-      run_opts << eval(gist[:evaluator]) if (!gist.key?(:strategy) || gist[:strategy].to_sym == :eval) && gist.key?(:evaluator)
-      run_opts = gist[:executor] if (gist.key?(:strategy) && gist[:strategy].to_sym == :exec) && gist.key?(:executor)
-      run_opts
-    end
-
     def run!(*args, &block)
       if multi?
         Gisture.logger.info "[gisture] Found multi-gist #{gist.name} with #{gists.count} gists"
@@ -93,7 +86,7 @@ module Gisture
         if clone?
           clone_and_run!(*args, &block)
         else
-          runnable.run!(*run_options.concat(args), &block)
+          run_with_options!(*args, &block)
         end
       end
     end
@@ -106,9 +99,28 @@ module Gisture
     def chdir_and_run!(path, *args, &block)
       cwd = Dir.pwd
       Dir.chdir path
-      result = runnable.run!(*run_options.concat(args), &block)
+      result = run_with_options!(*args, &block)
       Dir.chdir cwd
       result
+    end
+
+    def run_with_options!(*args, &block)
+      runnable.run!(*run_options.concat(args), &block)
+    end
+
+    def evaluator
+      @evaluator ||= eval(gist[:evaluator]) if (!gist.key?(:strategy) || gist[:strategy].to_sym == :eval) && gist.key?(:evaluator)
+    end
+
+    def executor
+      @executor ||= gist[:executor] if (gist.key?(:strategy) && gist[:strategy].to_sym == :exec) && gist.key?(:executor)
+    end
+
+    def run_options
+      run_opts = []
+      run_opts << evaluator unless evaluator.nil?
+      run_opts = executor unless executor.nil?
+      run_opts
     end
 
     protected
