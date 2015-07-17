@@ -3,18 +3,28 @@ module Gisture
     attr_reader :repo, :gist
 
     def self.load(repo, path)
-      new(repo, Hashie::Mash.new(YAML.load(repo.file(path).content).symbolize_keys))
+      hash = YAML.load(repo.file(path).content).symbolize_keys
+      hash[:name] ||= path
+      new(repo, hash)
     end
 
     def multi?
       gist.key?(:gistures) || gist.key?(:gists)
     end
 
-    def gists
+    def gist_hashes
       # can be a hash of hashes or an array of hashes
       hashes = (gist[:gistures] || gist[:gists] || [])
-      hashes = hashes.values if hashes.respond_to?(:values)
-      @gists ||= Repo::Gists.new(hashes.map { |mg| self.class.new(repo, mg) })
+      if hashes.is_a?(Array)
+        hashes = hashes.each_with_index.map { |h,i| {name: "gist #{i+1}"}.merge(h) }
+      else
+        hashes = hashes.map { |k,v| {name: k}.merge(v) }
+      end
+      hashes
+    end
+
+    def gists
+      @gists ||= Repo::Gists.new(gist_hashes.map { |mg| self.class.new(repo, mg) })
     end
 
     def file(file_path, strategy: nil)
@@ -74,8 +84,10 @@ module Gisture
 
     def run!(*args, &block)
       if multi?
+        Gisture.logger.info "[gisture] Found multi-gist '#{gist.name}' with #{gists.count} gists"
         gists.run!(*args, &block)
       else
+        Gisture.logger.info "[gisture] Preparing '#{gist.name}' from #{::File.join(repo.owner, repo.project)}"
         clone!
         chdir_and_run!(*args, &block)
       end
@@ -93,7 +105,8 @@ module Gisture
 
     def initialize(repo, gist)
       @repo = repo
-      @gist = gist
+      @gist = Hashie::Mash.new(gist)
+      @gist[:name] ||= 'unnamed gist'
     end
   end
 end
