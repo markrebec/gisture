@@ -1,3 +1,4 @@
+name: multi-gist
 gistures:
   simple:
     path: examples/hello_world/simple.rb
