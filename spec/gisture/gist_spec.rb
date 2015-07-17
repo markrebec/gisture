@@ -186,7 +186,7 @@ RSpec.describe Gisture::Gist do
     subject { Gisture::Gist.new(TEST_GIST_ID, filename: "test.rb") }
 
     it "returns a hash of the gist attributes" do
-      expect(subject.to_h).to eql({gist_id: TEST_GIST_ID, strategy: :eval, filename: "test.rb", version: nil})
+      expect(subject.to_h).to eql({gist_id: TEST_GIST_ID, strategy: :eval, filename: "test.rb", version: nil, evaluator: nil, executor: nil})
     end
   end
 end

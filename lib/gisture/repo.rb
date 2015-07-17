@@ -1,34 +1,24 @@
 module Gisture
   class Repo
     attr_reader :owner, :project
-    REPO_URL_REGEX = /\A((http[s]?:\/\/)?github\.com\/)?([a-z0-9_\-\.]*)\/([a-z0-9_\-\.]*)\/?\Z/i
-    FILE_URL_REGEX = /\A((http[s]?:\/\/)?github\.com\/)?(([a-z0-9_\-\.]*)\/([a-z0-9_\-\.]*))(\/[a-z0-9_\-\.\/]+)\Z/i
-    GISTURE_FILE_REGEX = /\A(gisture\.ya?ml|.+\.gist|.+\.gisture)\Z/ # gisture.yml, gisture.yaml, whatever.gist, whatever.gisture
 
     class << self
       def file(path, strategy: nil)
-        repo, file = parse_file_url(path)
+        repo, file = Gisture.parse_file_url(path)
         new(repo).file(file, strategy: strategy)
       end
 
-      def run!(path, strategy: nil, &block)
-        file(path, strategy: strategy).run!(&block)
+      def gists(path)
+        repo, gists = Gisture.parse_file_url(path)
+        new(repo).gists(gists)
       end
 
-      def parse_url(type, url)
-        matched = url.match(eval("#{type.to_s.upcase}_URL_REGEX"))
-        raise ArgumentError, "Invalid argument: '#{url}' is not a valid #{type.to_s} URL." if matched.nil?
-        matched
+      def gist(path)
+        gists(path).first
       end
 
-      def parse_repo_url(repo_url)
-        matched = parse_url(:repo, repo_url)
-        [matched[3], matched[4]]
-      end
-
-      def parse_file_url(file_url)
-        matched = parse_url(:file, file_url)
-        [matched[3], matched[6]]
+      def run!(path, strategy: nil, evaluator: nil, executor: nil, &block)
+        file(path, strategy: strategy, evaluator: evaluator, executor: executor).run!(&block)
       end
     end
 
@@ -40,12 +30,12 @@ module Gisture
       @repo ||= github.repos.get user: owner, repo: project
     end
 
-    def file(path, strategy: nil)
+    def file(path, strategy: nil, evaluator: nil, executor: nil)
       if cloned?
-        Gisture::File::Cloned.new(clone_path, path, basename: "#{owner}/#{project}", strategy: strategy)
+        Gisture::File::Cloned.new(clone_path, path, basename: "#{owner}/#{project}", strategy: strategy, evaluator: evaluator, executor: executor)
       else
         file = github.repos.contents.get(user: owner, repo: project, path: path).body
-        Gisture::Repo::File.new(file, basename: "#{owner}/#{project}", root: clone_path, strategy: strategy)
+        Gisture::Repo::File.new(file, basename: "#{owner}/#{project}", root: clone_path, strategy: strategy, evaluator: evaluator, executor: executor)
       end
     end
 
@@ -58,10 +48,10 @@ module Gisture
     end
 
     def gists(path)
-      if ::File.basename(path).match(GISTURE_FILE_REGEX)
+      if ::File.basename(path).match(Gisture::GISTURE_FILE_REGEX)
         [Gisture::Repo::Gist.new(self, path)]
       else # must be a directory, look for gists
-        files(path).select { |f| f.name.match(GISTURE_FILE_REGEX) }.map { |f| Gisture::Repo::Gist.new(self, f.path) }
+        files(path).select { |f| f.name.match(Gisture::GISTURE_FILE_REGEX) }.map { |f| Gisture::Repo::Gist.new(self, f.path) }
       end
     end
 
@@ -69,12 +59,12 @@ module Gisture
       gists(path).first
     end
 
-    def run!(path, &block)
+    def run!(path, *args, strategy: nil, evaluator: nil, executor: nil, &block)
       # best guess that it's a gisture file or a directory, otherwise try a file
-      if ::File.basename(path).match(GISTURE_FILE_REGEX) || ::File.extname(path).empty?
-        gists(path).map { |gist| gist.run!(&block) }
+      if ::File.basename(path).match(Gisture::GISTURE_FILE_REGEX) || ::File.extname(path).empty?
+        gists(path).map { |gist| gist.run!(*args, &block) }
       else
-        file(path).run!(&block)
+        file(path, strategy: strategy, evaluator: evaluator, executor: executor).run!(*args, &block)
       end
     rescue => e
       Gisture.logger.error "[gisture] #{e.class.name}: #{e.message}\n\t[gisture] #{e.backtrace.join("\n\t[gisture] ")}"
@@ -123,7 +113,7 @@ module Gisture
     protected
 
     def initialize(repo)
-      @owner, @project = self.class.parse_repo_url(repo)
+      @owner, @project = Gisture.parse_repo_url(repo)
       raise OwnerBlacklisted.new(owner) unless Gisture.configuration.whitelisted?(owner)
     end
   end

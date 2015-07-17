@@ -2,7 +2,7 @@ require 'tempfile'
 
 module Gisture
   class File
-    attr_reader :file, :basename, :root, :strategy
+    attr_reader :evaluator, :executor, :file, :basename, :root, :strategy
 
     STRATEGIES = [:eval, :exec, :load, :require]
 
@@ -30,13 +30,16 @@ module Gisture
 
     def eval!(*args, &block)
       Gisture.logger.info "[gisture] Running #{::File.join(basename, (file.filename || file.path))} via the :eval strategy"
-      evalor = evaluator(*args)
+      evalor = new_evaluator(*args)
       evalor.evaluate(&block)
       evalor
     end
 
     def exec!(*args, &block)
       Gisture.logger.info "[gisture] Running #{::File.join(basename, (file.filename || file.path))} via the :exec strategy"
+
+      # set args to the default executor array if none were passed and it exists
+      args = executor if args.empty? && executor.is_a?(Array)
 
       # map nils to file path in args to allow easily inserting the filepath wherever
       # makes sense in your executable arguments (i.e. 'ruby', '-v', nil, '--script-arg')
@@ -135,10 +138,12 @@ module Gisture
 
     protected
 
-    def initialize(file, basename: nil, root: nil, strategy: nil)
+    def initialize(file, basename: nil, root: nil, strategy: nil, evaluator: nil, executor: nil)
       @file = file
       @basename = basename
       @root = root
+      @evaluator = evaluator || Gisture::Evaluator
+      @executor = executor
       self.strategy = strategy || Gisture.configuration.strategy
     end
 
@@ -149,9 +154,9 @@ module Gisture
       block_given? ? yield : included
     end
 
-    def evaluator(*args)
+    def new_evaluator(*args)
       # push the default evaluator onto args so it gets used if no args were passed
-      args << Gisture::Evaluator
+      args << evaluator
       klass = eval(args.first.to_s)
       klass.new(file.content)
     end

@@ -1,13 +1,9 @@
 module Gisture
   class Gist
-    attr_reader :filename, :gist_id, :strategy, :version
+    attr_reader :evaluator, :executor, :filename, :gist_id, :strategy, :version
 
-    GIST_PATH_REGEX = /\A[a-z0-9_\-]+\/([0-9a-f]{20,20})\/?\Z/
-    GIST_URL_REGEX = /\Ahttp.+([0-9a-f]{20,20})\/?\Z/
-    GIST_URL_WITH_VERSION_REGEX = /\Ahttp.+([0-9a-f]{20,20})\/([0-9a-f]{40,40})\/?\Z/
-
-    def self.run!(gist, strategy: nil, filename: nil, version: nil, &block)
-      new(gist, strategy: strategy, filename: filename, version: version).run!(&block)
+    def self.run!(gist, *args, strategy: nil, filename: nil, version: nil, evaluator: nil, executor: nil, &block)
+      new(gist, strategy: strategy, filename: filename, version: version, evaluator: nil, executor: nil).run!(*args, &block)
     end
 
     def run!(*args, &block)
@@ -52,9 +48,9 @@ module Gisture
       raise ArgumentError, "The filename '#{fname}' was not found in the list of files for the gist '#{gist_id}'" if gist.files[fname].nil?
 
       if cloned?
-        Gisture::File::Cloned.new(clone_path, fname, basename: "#{owner}/#{gist_id}", strategy: strategy)
+        Gisture::File::Cloned.new(clone_path, fname, basename: "#{owner}/#{gist_id}", strategy: strategy, evaluator: evaluator, executor: executor)
       else
-        Gisture::File.new(gist.files[fname], basename: "#{owner}/#{gist_id}", strategy: strategy)
+        Gisture::File.new(gist.files[fname], basename: "#{owner}/#{gist_id}", strategy: strategy, evaluator: evaluator, executor: executor)
       end
     end
 
@@ -111,37 +107,21 @@ module Gisture
       { gist_id: gist_id,
         version: version,
         strategy: strategy,
-        filename: filename }
+        filename: filename,
+        evaluator: evaluator,
+        executor: executor }
     end
 
     protected
 
-    def initialize(gist, strategy: nil, filename: nil, version: nil)
-      self.strategy = strategy || Gisture.configuration.strategy
+    def initialize(gist, strategy: nil, filename: nil, version: nil, evaluator: nil, executor: nil)
+      gist_id, gist_version = Gisture.parse_gist_url(gist)
+      @gist_id = gist_id
+      @version = (version || gist_version)
       @filename = filename
-
-      if gist.match(/[^a-f0-9]+/i) # non-hex chars, probably a URL
-        @gist_id, @version = parse_gist_url(gist)
-        @version = version unless version.nil?
-      else
-        @gist_id = gist
-        @version = version
-      end
-
-    end
-
-    def parse_gist_url(gist_url)
-      case gist_url.to_s
-      when GIST_URL_WITH_VERSION_REGEX
-        matches = gist_url.match(GIST_URL_WITH_VERSION_REGEX)
-        return [matches[1], matches[2]]
-      when GIST_URL_REGEX
-        return [gist_url.match(GIST_URL_REGEX)[1], nil]
-      when GIST_PATH_REGEX
-        return [gist_url.match(GIST_PATH_REGEX)[1], nil]
-      else
-        raise ArgumentError, "Invalid argument: #{gist_url} is not a valid gist URL."
-      end
+      @evaluator = evaluator
+      @executor = executor
+      self.strategy = strategy || Gisture.configuration.strategy
     end
   end
 end
