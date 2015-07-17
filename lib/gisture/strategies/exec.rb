@@ -1,12 +1,13 @@
 module Gisture
   module Strategies
     class Exec < Tempfile
+      attr_reader :executor
 
       def run!(*args, &block)
         log!
 
         # set args to the default executor array if none were passed and it exists
-        args = file.executor if args.empty? && file.executor.is_a?(Array)
+        args = executor if args.empty? && executor.is_a?(Array)
 
         # map nils to file path in args to allow easily inserting the filepath wherever
         # makes sense in your executable arguments (i.e. 'ruby', '-v', nil, '--script-arg')
@@ -14,8 +15,8 @@ module Gisture
 
         # attempt to apply a default interpreter if nothing was provided
         # TODO create a legit map of default interpreter args and apply it
-        args = ['ruby'] if args.empty? && file.extname == '.rb'
-        args = ['node'] if args.empty? && file.extname == '.js'
+        args = ['ruby'] if args.empty? && extname == '.rb'
+        args = ['node'] if args.empty? && extname == '.js'
 
         # append the filepath if it was not inserted into the args already
         args << tempfile.path unless args.include?(tempfile.path)
@@ -25,6 +26,13 @@ module Gisture
 
         executed = `#{args.join(' ')}`.strip
         block_given? ? yield : executed
+      end
+
+      protected
+
+      def initialize(file, content: nil, basename: nil, filepath: nil, relpath: nil, executor: nil)
+        @executor = executor
+        super(file, content: content, basename: basename, filepath: filepath, relpath: relpath)
       end
     end
   end

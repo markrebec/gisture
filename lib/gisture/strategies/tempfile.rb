@@ -4,12 +4,6 @@ module Gisture
   module Strategies
     class Tempfile < Base
 
-      def tempfile_path
-        @tempfile.path
-      rescue => e
-        ::File.join(*[Gisture.configuration.tmpdir, file.basename.to_s.gsub(/\//, '-'), file.file.filename].compact)
-      end
-
       def tempfile
         @tempfile ||= write_tempfile
       end
@@ -21,14 +15,15 @@ module Gisture
 
       protected
 
-      def initialize(file, tempfile: nil)
+      def initialize(file, content: nil, basename: nil, filepath: nil, relpath: nil, tempfile: nil)
         super(file)
         @tempfile = tempfile.is_a?(::File) ? tempfile : ::File.new(tempfile) unless tempfile.nil?
       end
 
       def write_tempfile
-        tmpfile = ::Tempfile.new([file.basename.to_s.gsub(/\//, '-'), file.file.filename, file.extname].compact, Gisture.configuration.tmpdir)
-        tmpfile.write(file.file.content)
+        tmpname = [basename.to_s.gsub(/\//, '-'), filename, extname].compact
+        tmpfile = ::Tempfile.new(tmpname, Gisture.configuration.tmpdir)
+        tmpfile.write(content)
         tmpfile.close
         tmpfile
       end
