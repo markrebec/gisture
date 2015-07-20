@@ -4,14 +4,14 @@ RSpec.describe Gisture::Repo do
   context "when passed a valid repo slug" do
     subject { Gisture::Repo.new('markrebec/gisture') }
 
-    it "sets the owner and project correctly" do
+    it "sets the owner and project name correctly" do
     end
   end
 
   context "when passed a valid repo URL" do
     subject { Gisture::Repo.new('https://github.com/markrebec/gisture') }
 
-    it "sets the owner and project correctly" do
+    it "sets the owner and project name correctly" do
     end
   end
 

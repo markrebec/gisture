@@ -3,7 +3,7 @@ module Gisture
     include Cloneable
 
     attr_reader :evaluator, :executor, :filename, :gist_id, :strategy, :version
-    alias_method :project, :gist_id
+    alias_method :name, :gist_id
 
     def self.run!(gist, *args, strategy: nil, filename: nil, version: nil, evaluator: nil, executor: nil, &block)
       new(gist, strategy: strategy, filename: filename, version: version, evaluator: nil, executor: nil).run!(*args, &block)
@@ -54,9 +54,9 @@ module Gisture
       raise ArgumentError, "The filename '#{fname}' was not found in the list of files for the gist '#{gist_id}'" unless file_exists?(fname)
 
       if cloned?
-        Gisture::File::Cloned.new(clone_path, fname, basename: "#{owner}/#{gist_id}", strategy: strategy, evaluator: evaluator, executor: executor)
+        Gisture::File::Cloned.new(clone_path, fname, slug: "#{owner}/#{gist_id}", strategy: strategy, evaluator: evaluator, executor: executor)
       else
-        Gisture::File.new(gist.files[fname], basename: "#{owner}/#{gist_id}", strategy: strategy, evaluator: evaluator, executor: executor)
+        Gisture::File.new(gist.files[fname], slug: "#{owner}/#{gist_id}", strategy: strategy, evaluator: evaluator, executor: executor)
       end
     end
 

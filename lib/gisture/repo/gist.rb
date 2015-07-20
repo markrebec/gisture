@@ -91,7 +91,7 @@ module Gisture
     end
 
     def run_gist!(*args, &block)
-      Gisture.logger.info "[gisture] Found gist #{gist.name} from #{::File.join(repo.owner, repo.project)}"
+      Gisture.logger.info "[gisture] Found gist #{gist.name} from #{::File.join(repo.owner, repo.name)}"
       if clone?
         clone_and_run!(*args, &block)
       else

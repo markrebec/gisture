@@ -1,7 +1,7 @@
 module Gisture
   module Strategies
     class Base
-      attr_reader :content, :project, :relpath, :filename, :extname
+      attr_reader :content, :slug, :relpath, :filename, :extname
 
       def run_from!(path, *args, &block)
         Dir.chdir(path) { run!(*args, &block) }
@@ -10,9 +10,9 @@ module Gisture
 
       protected
 
-      def initialize(content, filename: nil, project: nil)
+      def initialize(content, filename: nil, slug: nil)
         @content = content
-        @project = project || 'gisture/tmp'
+        @slug = slug || 'gisture/tmp'
         @relpath = filename || 'anonymous'
         @filename = ::File.basename(@relpath)
         @extname = ::File.extname(@filename)

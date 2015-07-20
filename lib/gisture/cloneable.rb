@@ -1,7 +1,7 @@
 module Gisture
   module Cloneable
     def clone_path
-      @clone_path ||= ::File.join(Gisture.configuration.tmpdir, owner, project)
+      @clone_path ||= ::File.join(Gisture.configuration.tmpdir, owner, name)
     end
 
     def clone!(&block)
@@ -12,8 +12,8 @@ module Gisture
     def clone(&block)
       return self if cloned?
 
-      Gisture.logger.info "[gisture] Cloning #{owner}/#{project} into #{clone_path}"
-      Git.clone(clone_url, project, path: ::File.dirname(clone_path))
+      Gisture.logger.info "[gisture] Cloning #{owner}/#{name} into #{clone_path}"
+      Git.clone(clone_url, name, path: ::File.dirname(clone_path))
       stamp_clone!
 
       if block_given?

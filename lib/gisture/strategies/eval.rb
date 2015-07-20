@@ -17,8 +17,8 @@ module Gisture
 
       protected
 
-      def initialize(content, filename: nil, project: nil, evaluator: nil)
-        super(content, project: project, filename: filename)
+      def initialize(content, filename: nil, slug: nil, evaluator: nil)
+        super(content, slug: slug, filename: filename)
         @evaluator = evaluator || Gisture::Evaluator
       end
     end

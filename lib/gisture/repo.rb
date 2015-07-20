@@ -2,7 +2,7 @@ module Gisture
   class Repo
     include Cloneable
 
-    attr_reader :owner, :project
+    attr_reader :owner, :name
 
     class << self
       def file(path, strategy: nil)
@@ -29,15 +29,15 @@ module Gisture
     end
 
     def repo
-      @repo ||= github.repos.get user: owner, repo: project
+      @repo ||= github.repos.get user: owner, repo: name
     end
 
     def file(path, strategy: nil, evaluator: nil, executor: nil)
       if cloned?
-        Gisture::File::Cloned.new(clone_path, path, basename: "#{owner}/#{project}", strategy: strategy, evaluator: evaluator, executor: executor)
+        Gisture::File::Cloned.new(clone_path, path, slug: "#{owner}/#{name}", strategy: strategy, evaluator: evaluator, executor: executor)
       else
-        file = github.repos.contents.get(user: owner, repo: project, path: path).body
-        Gisture::Repo::File.new(file, basename: "#{owner}/#{project}", root: clone_path, strategy: strategy, evaluator: evaluator, executor: executor)
+        file = github.repos.contents.get(user: owner, repo: name, path: path).body
+        Gisture::Repo::File.new(file, slug: "#{owner}/#{name}", root: clone_path, strategy: strategy, evaluator: evaluator, executor: executor)
       end
     end
 
@@ -45,7 +45,7 @@ module Gisture
       if cloned?
         Dir[::File.join(clone_path, path, '*')].map { |f| Hashie::Mash.new({name: ::File.basename(f), path: ::File.join(path, ::File.basename(f))}) }
       else
-        github.repos.contents.get(user: owner, repo: project, path: path).body
+        github.repos.contents.get(user: owner, repo: name, path: path).body
       end
     end
 
@@ -75,13 +75,13 @@ module Gisture
     alias_method :run, :run!
 
     def clone_url
-      "https://#{Gisture.configuration.github.auth_str}@github.com/#{owner}/#{project}.git"
+      "https://#{Gisture.configuration.github.auth_str}@github.com/#{owner}/#{name}.git"
     end
 
     protected
 
     def initialize(repo)
-      @owner, @project = Gisture.parse_repo_url(repo)
+      @owner, @name = Gisture.parse_repo_url(repo)
       raise OwnerBlacklisted.new(owner) unless Gisture.configuration.whitelisted?(owner)
     end
   end

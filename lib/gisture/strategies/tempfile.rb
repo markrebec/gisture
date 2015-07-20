@@ -15,14 +15,14 @@ module Gisture
 
       protected
 
-      def initialize(content, filename: nil, project: nil, tempfile: nil)
-        super(content, project: project, filename: filename)
+      def initialize(content, filename: nil, slug: nil, tempfile: nil)
+        super(content, slug: slug, filename: filename)
         # allows overriding the tempfile with an existing cloned file path
         @tempfile = tempfile.is_a?(::File) ? tempfile : ::File.new(tempfile) unless tempfile.nil?
       end
 
       def write_tempfile
-        tmpname = [project.to_s.gsub(/\//, '-'), filename, extname].compact
+        tmpname = [slug.to_s.gsub(/\//, '-'), filename, extname].compact
         tmpfile = ::Tempfile.new(tmpname, Gisture.configuration.tmpdir)
         tmpfile.write(content)
         tmpfile.close

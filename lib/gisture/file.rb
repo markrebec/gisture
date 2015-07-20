@@ -1,6 +1,6 @@
 module Gisture
   class File
-    attr_reader :evaluator, :executor, :file, :basename, :root, :localized, :strategy
+    attr_reader :evaluator, :executor, :file, :slug, :root, :localized, :strategy
 
     STRATEGIES = [:eval, :exec, :load, :require]
 
@@ -24,7 +24,7 @@ module Gisture
 
     def run_args
       # important to use @localized here so it's nil if we haven't intentionally localized
-      @run_args ||= {filename: relative_path, project: basename, tempfile: @localized}
+      @run_args ||= {filename: relative_path, slug: slug, tempfile: @localized}
     end
 
     # TODO rework these to use .run_from!(root) if file is cloned/localized
@@ -111,10 +111,10 @@ module Gisture
 
     protected
 
-    def initialize(file, basename: nil, root: nil, strategy: nil, evaluator: nil, executor: nil)
+    def initialize(file, slug: nil, root: nil, strategy: nil, evaluator: nil, executor: nil)
       @file = file
-      @basename = basename
-      @root = root
+      @slug = slug
+      @root = root || ::File.join(Gisture.configuration.tmpdir, slug)
       @evaluator = evaluator || Gisture::Evaluator
       @executor = executor
       self.strategy = strategy || Gisture.configuration.strategy
