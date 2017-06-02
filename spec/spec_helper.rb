@@ -1,8 +1,12 @@
 require 'gisture'
 require 'rspec'
 require 'vcr'
+require 'simplecov'
 require 'coveralls'
-Coveralls.wear!
+SimpleCov.formatter = Coveralls::SimpleCov::Formatter
+SimpleCov.start do
+  add_filter '/spec'
+end
 
 Dir[File.join(File.dirname(__FILE__), '..', "spec/support/**/*.rb")].each { |f| require f }
 
